@@ -1,4 +1,5 @@
 import copy
+import os
 import time
 
 import hydra
@@ -20,7 +21,7 @@ def convert_time(seconds):
     return time.strftime("%H:%M:%S", time.gmtime(seconds))
 
 
-def train(model, train_dataloader, valid_dataloader, dataset_size, cfg):
+def train(model, train_dataloader, valid_dataloader, dataset_size, cfg, model_path, name):
     dataloaders = {'train': train_dataloader, 'val': valid_dataloader}
     metric = nn.MSELoss(reduction='sum')
     criterion = nn.MSELoss(reduction='mean')
@@ -75,6 +76,10 @@ def train(model, train_dataloader, valid_dataloader, dataset_size, cfg):
                 print(f"/\\ Better loss {best_MSE} --> {epoch_metric}")
                 best_MSE, best_epoch = epoch_metric, epoch
                 best_model_wts = copy.deepcopy(model.state_dict())
+                filename = os.path.join(model_path, f"{name}_{best_MSE:.4f}_{best_epoch}.pth")
+                print(f"\tsaving model {filename}")
+                torch.save(model, filename)
+
                 patience = 0
             else:
                 patience += 1
@@ -156,7 +161,7 @@ def my_app(cfg: DictConfig) -> None:
     model = create_pafnucy(cfg.network)
     summary(model, input_size=(batch_size, 19, 25, 25, 25))
 
-    describe(model)
+    #describe(model)
 
     try:
         mlflow.end_run()
@@ -177,7 +182,8 @@ def my_app(cfg: DictConfig) -> None:
         mlflow.log_param("name", cfg.name)
 
         # train
-        best_model, best_epoch = train(model, train_dataloader, valid_dataloader, dataset_size, cfg.training)
+        best_model, best_epoch = train(model, train_dataloader, valid_dataloader, dataset_size, cfg.training,
+                                       cfg.io.model_path, cfg.name)
         mlflow.log_param("best_epoch", best_epoch)
         # test
         raw_data_test = RawDataset(cfg.io.input_dir, 'test', cfg.data.max_dist)
