@@ -1,7 +1,7 @@
 mlflow:
   path: ${oc.env:luh_ALL_CCFRSCRATCH}/proli/mlruns
   runname: pafnucy_v0
-
+    
 io:
   input_dir: ${oc.env:luh_ALL_CCFRWORK}/deep_learning/pafnucy/data/CoG_12 # contains train, val and test dataset as h5py files
   log_dir: ./log
@@ -13,14 +13,11 @@ data:
   replicate: 1 # TODO ??
 
 network:
+  conv_channels: [ 19, 64, 128, 256 ] # number of filters in convolutional layers
   conv_kernel_size: 5 # patch size for convolutional layers
   pool_kernel_size: 2 # patch size for pooling layers
-  conv_channels: [ 19, 64, 128, 256 ] # number of filters in convolutional layers
   dense_sizes: [ 16384, 1000, 500, 200 ] # number of neurons in dense layers
-  # setup [MS]
-  input_spatial_dim: 25
-  conv_dims: [ 19, 64, 256, 1024 ]
-  kp: 0.5 # keep probability for dropout
+  drop_p: 0.5 # probability for dropout
 
 training:
   learning_rate: 1e-5 # learning rate

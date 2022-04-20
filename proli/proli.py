@@ -11,7 +11,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 from torchinfo import summary
 
-from codes.pafnucy_model import create_pafnucy, describe
+from codes.pafnucy import create_pafnucy
 from codes.pt_data import ProteinLigand_3DDataset
 from codes.raw_data import RawDataset
 from codes.transformations import build_rotations
@@ -158,10 +158,15 @@ def my_app(cfg: DictConfig) -> None:
                                   shuffle=False, num_workers=4, pin_memory=True, persistent_workers=True)
 
     # create model
-    model = create_pafnucy(cfg.network)
+    model = create_pafnucy(
+        conv_cfg = cfg.network.conv_channels,
+        conv_kernel_size = cfg.network.conv_kernel_size,
+        pool_kernel_size = cfg.network.pool_kernel_size,
+        fc_cfg = cfg.network.dense_sizes,
+        dropout_prob = cfg.network.drop_p
+    )
+    
     summary(model, input_size=(batch_size, 19, 25, 25, 25))
-
-    #describe(model)
 
     try:
         mlflow.end_run()
@@ -176,7 +181,7 @@ def my_app(cfg: DictConfig) -> None:
         mlflow.log_param("max_epoch", cfg.training.num_epochs)
         mlflow.log_param("learning_rate", cfg.training.learning_rate)
         mlflow.log_param("weight_decay", cfg.training.weight_decay)
-        mlflow.log_param("dropout", cfg.network.kp)
+        mlflow.log_param("dropout", cfg.network.drop_p)
         mlflow.log_param("patience", cfg.training.patience)
         mlflow.log_param("batch_size", batch_size)
         mlflow.log_param("name", cfg.name)
