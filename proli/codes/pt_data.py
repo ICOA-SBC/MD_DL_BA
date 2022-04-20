@@ -2,7 +2,7 @@ import numpy as np
 from numpy.random import randint
 from torch.utils.data import Dataset
 
-from code.transformations import convert_to_grid
+from codes.transformations import convert_to_grid
 
 
 class ProteinLigand_3DDataset(Dataset):

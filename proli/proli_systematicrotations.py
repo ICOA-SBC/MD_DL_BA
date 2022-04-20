@@ -1,4 +1,5 @@
 import copy
+import os.path
 import time
 
 import hydra
@@ -10,11 +11,11 @@ from torch import nn
 from torch.utils.data import DataLoader
 from torchinfo import summary
 
-from code.nilnn import NilNN
-from code.pafnucy_model import describe
-from code.pt_data import ProteinLigand_3DDataset
-from code.raw_data import RawDataset
-from code.transformations import build_rotations
+from codes.nilnn import NilNN
+from codes.pafnucy_model import describe, create_pafnucy
+from codes.pt_data import ProteinLigand_3DDataset
+from codes.raw_data import RawDataset
+from codes.transformations import build_rotations
 
 
 def convert_time(seconds):
@@ -22,7 +23,7 @@ def convert_time(seconds):
 
 
 def train_with_rotations(model, raw_data_train, valid_dataloader, dataset_size, cfg, rotations, grid_spacing,
-                         batch_size):
+                         batch_size, model_path, name):
     metric = nn.MSELoss(reduction='sum')
     criterion = nn.MSELoss(reduction='mean')
     optimizer = optim.Adam(model.parameters(), lr=cfg.learning_rate, weight_decay=cfg.weight_decay)
@@ -86,6 +87,7 @@ def train_with_rotations(model, raw_data_train, valid_dataloader, dataset_size, 
                     print(f"/\\ Better loss {best_MSE} --> {epoch_metric} at the end of an epoch * 24 rotations")
                     best_MSE, best_epoch = epoch_metric, epoch
                     best_model_wts = copy.deepcopy(model.state_dict())
+                    torch.save(model, os.path.join(model_path, f"{name}_{best_MSE:.4f}_{best_epoch}.pth"))
                     patience = 0
                 else:
                     patience += 1
@@ -102,6 +104,7 @@ def train_with_rotations(model, raw_data_train, valid_dataloader, dataset_size, 
             \n\tTotal duration: {convert_time(duration)}")
 
     model.load_state_dict(best_model_wts)
+    torch.save(model, model_path)
 
     return model, best_epoch
 
@@ -125,7 +128,7 @@ def test(model, test_dataloader, test_samples):
     mlflow.log_metric(f"test_MSELoss", metric)
 
 
-@hydra.main(config_path="./configs", config_name="default")
+@hydra.main(config_path="./configs", config_name="default_rotations")
 def my_app(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
 
@@ -157,16 +160,13 @@ def my_app(cfg: DictConfig) -> None:
     dataset_size = {'train': len(train_dataset), 'val': len(valid_dataset)}
 
     batch_size = cfg.training.batch_size
-    train_dataloader = DataLoader(train_dataset, batch_size=batch_size,
-                                  shuffle=True, num_workers=4, pin_memory=True, persistent_workers=True)
+    #train_dataloader = DataLoader(train_dataset, batch_size=batch_size,
+    #                              shuffle=True, num_workers=4, pin_memory=True, persistent_workers=True)
     valid_dataloader = DataLoader(valid_dataset, batch_size=batch_size,
                                   shuffle=False, num_workers=4, pin_memory=True, persistent_workers=True)
 
     # create model
-    #    print("PAFNUCY ----------------------------------------")
-    #    model = create_pafnucy(cfg.network)
-    print("NilNN ------------------------------------------")
-    model = NilNN(19)
+    model = create_pafnucy(cfg.network)
     summary(model, input_size=(batch_size, 19, 25, 25, 25))
 
     describe(model)
@@ -192,7 +192,8 @@ def my_app(cfg: DictConfig) -> None:
         # train
         best_model, best_epoch = train_with_rotations(model, raw_data_train, valid_dataloader, dataset_size,
                                                       cfg.training, rotations_matrices,
-                                                      cfg.data.grid_spacing, cfg.training.batch_size)
+                                                      cfg.data.grid_spacing, cfg.training.batch_size,
+                                                      cfg.io.model_path, cfg.name)
         mlflow.log_param("best_epoch", best_epoch)
         # test
         raw_data_test = RawDataset(cfg.io.input_dir, 'test', cfg.data.max_dist)

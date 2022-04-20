@@ -11,10 +11,10 @@ from torch import nn
 from torch.utils.data import DataLoader
 from torchinfo import summary
 
-from code.pafnucy_model import create_pafnucy, describe
-from code.pt_data import ProteinLigand_3DDataset
-from code.raw_data import RawDataset
-from code.transformations import build_rotations
+from codes.pafnucy_model import create_pafnucy, describe
+from codes.pt_data import ProteinLigand_3DDataset
+from codes.raw_data import RawDataset
+from codes.transformations import build_rotations
 
 
 def convert_time(seconds):
