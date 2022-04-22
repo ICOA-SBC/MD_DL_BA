@@ -12,14 +12,11 @@ data:
   max_dist: 12 # max distance from complex center
 
 network:
+  conv_channels: [ 19, 64, 128, 256 ] # number of filters in convolutional layers
   conv_kernel_size: 5 # patch size for convolutional layers
   pool_kernel_size: 2 # patch size for pooling layers
-  conv_channels: [ 19, 64, 128, 256 ] # number of filters in convolutional layers
   dense_sizes: [ 16384, 1000, 500, 200 ] # number of neurons in dense layers
-  # setup [MS]
-  input_spatial_dim: 25
-  conv_dims: [ 19, 64, 256, 1024 ]
-  kp: 0.5 # keep probability for dropout
+  drop_p: 0.5 # probability for dropout
 
 training:
   learning_rate: 1e-5 # learning rate

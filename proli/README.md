@@ -4,7 +4,7 @@ proli works with [hydra](https://hydra.cc/docs/intro/) and [mlflow](https://mlfl
 
 ## Setup
 
-This code required several additional libraries: 
+This code requires several additional libraries: 
 
 ```commandline
 module load pytorch-gpu/py3/1.10.0
@@ -26,12 +26,4 @@ This will take all the parameters setup from hydra (see `configs/default.yaml`) 
 
 See slurm file for an example of a job (don't forget to update your account!).
 
-If you keep the default for mlrun, the experiment logs will be in `$luh_ALL_CCFRSCRATCH/proli/mlruns`.
-
-## Todos
-
-Many things, in particular:
-
-* **saving, loading models**
-* more metrics on test dataset
-* ...
+If you keep the default for **mlflow**, the experiment logs will be in `$luh_ALL_CCFRSCRATCH/proli/mlruns`.
