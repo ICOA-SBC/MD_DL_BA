@@ -1,7 +1,7 @@
 mlflow:
   path: ${oc.env:luh_ALL_CCFRSCRATCH}/proli/mlruns
-  runname: pafnucy_v0
-    
+  runname: pafnucy_v1
+
 io:
   input_dir: ${oc.env:luh_ALL_CCFRWORK}/deep_learning/pafnucy/data/CoG_12 # contains train, val and test dataset as h5py files
   log_dir: ./log
@@ -10,7 +10,6 @@ io:
 data:
   grid_spacing: 1.0 # distance between grid points in angstrom
   max_dist: 12 # max distance from complex center
-  replicate: 1 # TODO ??
 
 network:
   conv_channels: [ 19, 64, 128, 256 ] # number of filters in convolutional layers
@@ -27,6 +26,6 @@ training:
   #checkpoint_max_to_keep: 10 # number of checkpoints to keep
   weight_decay: 0.001 # lambda for weight decay
 
-name: empty
+name: pafnucy
 
 
