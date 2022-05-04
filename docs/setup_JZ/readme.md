@@ -10,8 +10,8 @@
 The goal is to share the same environment between users:
 
 ```
-export PYTHONUSERBASE=$luh_ALL_CCFRWORK/.local_tf1.2
-export CONDA_ENVS_PATH=$luh_ALL_CCFRWORK/conda
+export PYTHONUSERBASE=$dzc_ALL_CCFRWORK/.local_tf1.2
+export CONDA_ENVS_PATH=$dzc_ALL_CCFRWORK/conda
 mkdir $PYTHONUSERBASE $CONDA_ENVS_PATH
 
 module purge
