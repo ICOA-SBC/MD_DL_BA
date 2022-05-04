@@ -16,15 +16,15 @@ mkdir $PYTHONUSERBASE $CONDA_ENVS_PATH
 
 module purge
 module load anaconda-py3/2021.05
-conda env create -f environment_gpu.yml --prefix $luh_ALL_CCFRWORK/conda/tf1.2
+conda env create -f environment_gpu.yml --prefix $dzc_ALL_CCFRWORK/conda/tf1.2
 conda activate tf1.2
 ```
 
 If we ever need to add some libraries:
 
 ```
-export PYTHONUSERBASE=$luh_ALL_CCFRWORK/.local_tf1.2
-export CONDA_ENVS_PATH=$luh_ALL_CCFRWORK/conda
+export PYTHONUSERBASE=$dzc_ALL_CCFRWORK/.local_tf1.2
+export CONDA_ENVS_PATH=$dzc_ALL_CCFRWORK/conda
 module load anaconda-py3/2021.05
 conda activate tf1.2
 ```
@@ -45,10 +45,10 @@ pip install --no-cache-dir --user <package>
 
 ```
 module purge
-export CONDA_ENVS_PATH=$luh_ALL_CCFRWORK/conda
+export CONDA_ENVS_PATH=$dzc_ALL_CCFRWORK/conda
 module load anaconda-py3/2021.05
 
-export PYTHONUSERBASE=$luh_ALL_CCFRWORK/.local_tf1.2
+export PYTHONUSERBASE=$dzc_ALL_CCFRWORK/.local_tf1.2
 
 conda activate tf1.2
 ```
