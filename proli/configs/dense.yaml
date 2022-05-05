@@ -1,0 +1,36 @@
+mlflow:
+  # path to store mlflow experience
+  path: ${oc.env:dzc_ALL_CCFRSCRATCH}/proli/mlruns
+  # name of the mlflow experience
+  runname: densenucy
+    
+io:
+  # path to train, val and test dataset as h5py files
+  input_dir: ${oc.env:dzc_ALL_CCFRWORK}/deep_learning/pafnucy/data/CoG_12
+  # path where are saved the trained model
+  model_path: ${oc.env:luh_ALL_CCFRSCRATCH}/proli/models
+
+data:
+  # distance between grid points in angstrom
+  grid_spacing: 1.0
+  # max distance from complex center
+  max_dist: 12
+
+training:
+  learning_rate: 1e-5 # learning rate
+  weight_decay: 0.0001 # lambda for weight decay
+  batch_size: 20 # batch size
+  num_epochs: 800 # max number of epochs
+  patience: 80 # early stopping
+  
+network:
+  # number of channels added after each conv block in dense block
+  growth_rate: 96
+  # number of conv blocks in each dense block
+  dense_cfg: [2, 2]
+  # number of neurons in each fc block
+  # ! the first element depends on growth_rate, dense_cfg and input_size 
+  fc_cfg: [10240]
+  
+
+name: densenucy_v3_with_systemic_rotation
