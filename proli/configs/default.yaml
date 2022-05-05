@@ -1,31 +1,36 @@
 mlflow:
-  path: ${oc.env:luh_ALL_CCFRSCRATCH}/proli/mlruns
-  runname: pafnucy_v1
-
+  # path to store mlflow experience
+  path: ${oc.env:dzc_ALL_CCFRSCRATCH}/proli/mlruns
+  # name of the mlflow experience
+  runname: pafnucy
+    
 io:
-  input_dir: ${oc.env:luh_ALL_CCFRWORK}/deep_learning/pafnucy/data/CoG_12 # contains train, val and test dataset as h5py files
-  log_dir: ./log
+  # path to train, val and test dataset as h5py files
+  input_dir: ${oc.env:dzc_ALL_CCFRWORK}/deep_learning/pafnucy/data/CoG_12
+  # path where are saved the trained model
   model_path: ${oc.env:luh_ALL_CCFRSCRATCH}/proli/models
 
 data:
-  grid_spacing: 1.0 # distance between grid points in angstrom
-  max_dist: 12 # max distance from complex center
+  # distance between grid points in angstrom
+  grid_spacing: 1.0
+  # max distance from complex center
+  max_dist: 12
 
+training:
+  learning_rate: 1e-5 # learning rate
+  weight_decay: 0.0001 # lambda for weight decay
+  batch_size: 20 # batch size
+  num_epochs: 800 # max number of epochs
+  patience: 80 # early stopping
+  
 network:
-  conv_channels: [ 19, 64, 128, 256 ] # number of filters in convolutional layers
+  conv_channels: [ 19, 64, 128, 256 ] # number of filters in conv layers
   conv_kernel_size: 5 # patch size for convolutional layers
   pool_kernel_size: 2 # patch size for pooling layers
   dense_sizes: [ 16384, 1000, 500, 200 ] # number of neurons in dense layers
   drop_p: 0.5 # probability for dropout
 
-training:
-  learning_rate: 1e-5 # learning rate
-  batch_size: 20 # batch size
-  num_epochs: 200 # number of epochs
-  patience: 40 # early stopping
-  #checkpoint_max_to_keep: 10 # number of checkpoints to keep
-  weight_decay: 0.001 # lambda for weight decay
 
-name: pafnucy
+name: pafnucy_v0
 
 

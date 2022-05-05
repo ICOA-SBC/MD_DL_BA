@@ -177,15 +177,18 @@ def my_app(cfg: DictConfig) -> None:
     mlflow.set_experiment(cfg.mlflow.runname)
 
     with mlflow.start_run() as run:
-        mlflow.log_param("val_samples", len(valid_dataset))
-        mlflow.log_param("max_epoch", cfg.training.num_epochs)
+        mlflow.log_param("name", cfg.name)
+        mlflow.log_param("batch_size", cfg.training.batch_size)
         mlflow.log_param("learning_rate", cfg.training.learning_rate)
         mlflow.log_param("weight_decay", cfg.training.weight_decay)
+        mlflow.log_param("conv_cfg", cfg.network.conv_channels)
+        mlflow.log_param("conv_kernel_size", cfg.network.conv_kernel_size)
+        mlflow.log_param("pool_kernel_size", cfg.network.pool_kernel_size)
+        mlflow.log_param("fc_cfg", cfg.network.dense_sizes)
         mlflow.log_param("dropout", cfg.network.drop_p)
         mlflow.log_param("patience", cfg.training.patience)
-        mlflow.log_param("batch_size", batch_size)
-        mlflow.log_param("name", cfg.name)
-
+        mlflow.log_param("max_epoch", cfg.training.num_epochs)
+        
         # train
         best_model, best_epoch = train(model, train_dataloader, valid_dataloader, dataset_size, cfg.training,
                                        cfg.io.model_path, cfg.name)

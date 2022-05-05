@@ -3,8 +3,9 @@
 Code porting of `https://gitlab.com/cheminfIBB/pafnucy` to pytorch/1.11
 The initial project used `tfbio.net` module to define Pafnucy in
 tensorflow/1.2
+tfbio : https://gitlab.com/cheminfIBB/tfbio/-/tree/master/tfbio
 
-    Typical usage example:
+    Typical usage examples:
 
     model = get_pafnucy()
     features = make_conv_block(conv_cfg, kconv, kpool)
@@ -61,7 +62,7 @@ class Pafnucy(nn.Module):
         return x.squeeze()
 
 
-def make_conv_block(
+def make_features(
     conv_cfg: List[int],
     conv_kernel_size: int,
     pool_kernel_size: int
@@ -71,6 +72,7 @@ def make_conv_block(
     Each layer applies the following transformation :
         y = max_pool(relu(conv3d(x, w) + b))
     where x = input, w = convolution kernel, b = bias and y = output.
+    
     Arg examples :
         conv_cfg = [input_channels, ..., ..., output_channels]
     Create a sequence of `len(conv_cfg) - 1` layers
@@ -102,6 +104,7 @@ def make_fc_block(fc_cfg: List[int], dropout_prob: float) -> nn.Sequential:
     Each layer applies the following transformation :
         y = dropout(relu(matmut(x, w) + b))
     where x = input, w = weights, b = bias and y = output.
+    
     Arg examples :
         fc_cfg = [input_neurons, ..., ..., output_neurons]
     Create a sequence of `len(fc_cfg) - 1` layers
@@ -163,7 +166,7 @@ def create_pafnucy(
         dropout_prob : probability to drop a neuron
         pretrained_path : path to charge pretrained weights
     """
-    features = make_conv_block(conv_cfg, conv_kernel_size, pool_kernel_size)
+    features = make_features(conv_cfg, conv_kernel_size, pool_kernel_size)
     regressor = make_regressor(fc_cfg, dropout_prob)
 
     if pretrained_path and isinstance(pretrained_path, str):
