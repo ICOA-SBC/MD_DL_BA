@@ -26,4 +26,4 @@ This will take all the parameters setup from hydra (see `configs/default.yaml`) 
 
 See slurm file for an example of a job (don't forget to update your account!).
 
-If you keep the default for **mlflow**, the experiment logs will be in `$luh_ALL_CCFRSCRATCH/proli/mlruns`.
+If you keep the default for **mlflow**, the experiment logs will be in `$dzc_ALL_CCFRSCRATCH/proli/mlruns`.
