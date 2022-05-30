@@ -174,10 +174,9 @@ def my_app(cfg: DictConfig) -> None:
         print("mlflow not running")
 
     mlflow.set_tracking_uri(cfg.mlflow.path)
-    mlflow.set_experiment(cfg.mlflow.runname)
+    mlflow.set_experiment(cfg.experiment_name)
 
-    with mlflow.start_run() as run:
-        mlflow.log_param("name", cfg.name)
+    with mlflow.start_run(run_name=cfg.mlflow.run_name) as run:
         mlflow.log_param("batch_size", cfg.training.batch_size)
         mlflow.log_param("learning_rate", cfg.training.learning_rate)
         mlflow.log_param("weight_decay", cfg.training.weight_decay)
@@ -191,7 +190,7 @@ def my_app(cfg: DictConfig) -> None:
         
         # train
         best_model, best_epoch = train(model, train_dataloader, valid_dataloader, dataset_size, cfg.training,
-                                       cfg.io.model_path, cfg.name)
+                                       cfg.io.model_path, cfg.experiment_name)
         mlflow.log_param("best_epoch", best_epoch)
         # test
         raw_data_test = RawDataset(cfg.io.input_dir, 'test', cfg.data.max_dist)
