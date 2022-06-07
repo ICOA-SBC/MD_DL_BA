@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --account=dzc@v100
+#SBATCH --account=sos@v100
 #SBATCH --job-name=test
-#SBATCH --qos=qos_gpu-dev
+#SBATCH --qos=qos_gpu-t3
 #SBATCH --output=log/%x.out
 #SBATCH --error=log/%x.err
-#SBATCH --time=1:00:00
+#SBATCH --time=4:00:00
 #SBATCH --gres gpu:1
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
@@ -23,7 +23,7 @@ date
 
 time srun -u python proli_systematic_rotations.py \
     io.input_dir=$dzc_ALL_CCFRWORK/deep_learning/pafnucy/data/subset_no_structure_all_frame \
-    mlflow.run_name=run_cp \
+    mlflow.run_name=run_cp_2 \
     experiment_name=expr_cp
 
 date

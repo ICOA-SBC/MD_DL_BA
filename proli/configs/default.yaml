@@ -1,14 +1,12 @@
 mlflow:
-  # path to store mlflow experience
-  path: ${oc.env:dzc_ALL_CCFRSCRATCH}/proli/mlruns
-  # name of the mlflow experience
-  runname: pafnucy
+  path: ${oc.env:SCRATCH}/proli/mlruns
+  run_name: pafnucy
     
 io:
   # path to train, val and test dataset as h5py files
   input_dir: ${oc.env:dzc_ALL_CCFRWORK}/deep_learning/pafnucy/data/CoG_12
   # path where are saved the trained model
-  model_path: ${oc.env:luh_ALL_CCFRSCRATCH}/proli/models
+  model_path: ${oc.env:SCRATCH}/proli/models
 
 data:
   # distance between grid points in angstrom
@@ -31,6 +29,6 @@ network:
   drop_p: 0.5 # probability for dropout
 
 
-name: pafnucy_v0
+experiment_name: test
 
 

@@ -15,6 +15,7 @@ from codes.pafnucy import create_pafnucy
 from codes.pt_data import ProteinLigand_3DDataset
 from codes.raw_data import RawDataset
 from codes.transformations import build_rotations
+from proli_test import analyse, predict
 
 
 def convert_time(seconds):
@@ -31,7 +32,7 @@ def train_with_rotations(model, raw_data_train, valid_dataloader, dataset_size, 
     best_MSE = 100.0
     best_epoch = -1
     patience = 0
-    max_patience = cfg.patience*no_of_rotations
+    max_patience = cfg.patience * no_of_rotations
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
@@ -86,7 +87,9 @@ def train_with_rotations(model, raw_data_train, valid_dataloader, dataset_size, 
                     print(f"/\\ Better loss {best_MSE} --> {epoch_metric} at the end of an epoch * 24 rotations")
                     best_MSE, best_epoch = epoch_metric, epoch
                     best_model_wts = copy.deepcopy(model.state_dict())
-                    torch.save(model, os.path.join(model_path, f"{name}_{best_MSE:.4f}_{best_epoch}.pth"))
+                    filename = os.path.join(model_path, f"{name}_{best_MSE:.4f}_{best_epoch}.pth")
+                    print(f"\tsaving model {filename}")
+                    torch.save(model, filename)
                     patience = 0
                 else:
                     patience += 1
@@ -103,7 +106,6 @@ def train_with_rotations(model, raw_data_train, valid_dataloader, dataset_size, 
             \n\tTotal duration: {convert_time(duration)}")
 
     model.load_state_dict(best_model_wts)
-    torch.save(model, model_path)
 
     return model, best_epoch
 
@@ -125,6 +127,12 @@ def test(model, test_dataloader, test_samples):
     metric = running_metrics / test_samples
     print(f"\t[Test] MSELoss {metric:.4f}")
     mlflow.log_metric(f"test_MSELoss", metric)
+
+
+def save_model(model, pathname, experiment_name, run_name, rmse):
+    filename = os.path.join(pathname, f"{experiment_name}_{run_name}_{rmse:.4f}.pth")
+    print(f"\tsaving model {filename}")
+    torch.save(model, filename)
 
 
 @hydra.main(config_path="./configs", config_name="default_rotations")
@@ -159,18 +167,18 @@ def my_app(cfg: DictConfig) -> None:
     dataset_size = {'train': len(train_dataset), 'val': len(valid_dataset)}
 
     batch_size = cfg.training.batch_size
-    #train_dataloader = DataLoader(train_dataset, batch_size=batch_size,
+    # train_dataloader = DataLoader(train_dataset, batch_size=batch_size,
     #                              shuffle=True, num_workers=4, pin_memory=True, persistent_workers=True)
     valid_dataloader = DataLoader(valid_dataset, batch_size=batch_size,
                                   shuffle=False, num_workers=4, pin_memory=True, persistent_workers=True)
 
     # create model
-    model = create_pafnucy(        
-        conv_cfg = cfg.network.conv_channels,
-        conv_kernel_size = cfg.network.conv_kernel_size,
-        pool_kernel_size = cfg.network.pool_kernel_size,
-        fc_cfg = cfg.network.dense_sizes,
-        dropout_prob = cfg.network.drop_p)
+    model = create_pafnucy(
+        conv_cfg=cfg.network.conv_channels,
+        conv_kernel_size=cfg.network.conv_kernel_size,
+        pool_kernel_size=cfg.network.pool_kernel_size,
+        fc_cfg=cfg.network.dense_sizes,
+        dropout_prob=cfg.network.drop_p)
     summary(model, input_size=(batch_size, 19, 25, 25, 25))
 
     try:
@@ -211,7 +219,17 @@ def my_app(cfg: DictConfig) -> None:
                                      shuffle=False, num_workers=4, pin_memory=True, persistent_workers=True)
 
         test(best_model, test_dataloader, len(test_dataset))
+        affinities, predictions = predict(best_model, test_dataloader, len(test_dataset))
+        rmse, mae, corr = analyse(affinities, predictions)
+        mlflow.log_metric(f"test_rmse", rmse)
+        mlflow.log_metric(f"test_mae", mae)
+        mlflow.log_metric(f"test_r", corr[0])
+        mlflow.log_metric(f"test_p-value", corr[1])
+
+        print(f"[TEST] rmse: {rmse:.4f} mae: {mae:.4f} corr: {corr}")
+
         mlflow.pytorch.log_model(best_model, "model")
+        save_model(model, cfg.io.model_path, cfg.experiment_name, cfg.mlflow.run_name, rmse)
 
 
 if __name__ == "__main__":

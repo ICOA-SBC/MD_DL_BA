@@ -15,6 +15,7 @@ from codes.pafnucy import create_pafnucy
 from codes.pt_data import ProteinLigand_3DDataset
 from codes.raw_data import RawDataset
 from codes.transformations import build_rotations
+from proli_test import analyse, predict
 
 
 def convert_time(seconds):
@@ -119,6 +120,12 @@ def test(model, test_dataloader, test_samples):
     mlflow.log_metric(f"test_MSELoss", metric)
 
 
+def save_model(model, pathname, experiment_name, run_name, rmse):
+    filename = os.path.join(pathname, f"{experiment_name}_{run_name}_{rmse:.4f}.pth")
+    print(f"\tsaving model {filename}")
+    torch.save(model, filename)
+
+
 @hydra.main(config_path="./configs", config_name="default")
 def my_app(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
@@ -159,13 +166,13 @@ def my_app(cfg: DictConfig) -> None:
 
     # create model
     model = create_pafnucy(
-        conv_cfg = cfg.network.conv_channels,
-        conv_kernel_size = cfg.network.conv_kernel_size,
-        pool_kernel_size = cfg.network.pool_kernel_size,
-        fc_cfg = cfg.network.dense_sizes,
-        dropout_prob = cfg.network.drop_p
+        conv_cfg=cfg.network.conv_channels,
+        conv_kernel_size=cfg.network.conv_kernel_size,
+        pool_kernel_size=cfg.network.pool_kernel_size,
+        fc_cfg=cfg.network.dense_sizes,
+        dropout_prob=cfg.network.drop_p
     )
-    
+
     summary(model, input_size=(batch_size, 19, 25, 25, 25))
 
     try:
@@ -187,7 +194,7 @@ def my_app(cfg: DictConfig) -> None:
         mlflow.log_param("dropout", cfg.network.drop_p)
         mlflow.log_param("patience", cfg.training.patience)
         mlflow.log_param("max_epoch", cfg.training.num_epochs)
-        
+
         # train
         best_model, best_epoch = train(model, train_dataloader, valid_dataloader, dataset_size, cfg.training,
                                        cfg.io.model_path, cfg.experiment_name)
@@ -206,7 +213,18 @@ def my_app(cfg: DictConfig) -> None:
                                      shuffle=False, num_workers=4, pin_memory=True, persistent_workers=True)
 
         test(best_model, test_dataloader, len(test_dataset))
+
+        affinities, predictions = predict(best_model, test_dataloader, len(test_dataset))
+        rmse, mae, corr = analyse(affinities, predictions)
+        mlflow.log_metric(f"test_rmse", rmse)
+        mlflow.log_metric(f"test_mae", mae)
+        mlflow.log_metric(f"test_r", corr[0])
+        mlflow.log_metric(f"test_p-value", corr[1])
+
+        print(f"[TEST] rmse: {rmse:.4f} mae: {mae:.4f} corr: {corr}")
+
         mlflow.pytorch.log_model(best_model, "model")
+        save_model(best_model, cfg.io.model_path, cfg.experiment_name, cfg.mlflow.run_name, rmse)
 
 
 if __name__ == "__main__":

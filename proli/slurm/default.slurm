@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --nodes=1
 #SBATCH --job-name=test
-#SBATCH --account=<tellme>
+#SBATCH --account=sos@v100
 #SBATCH --qos=qos_gpu-t3
 #SBATCH --output=log/%x.out
 #SBATCH --error=log/%x.err
@@ -21,6 +21,6 @@ set -x
 
 date
 
-time srun -u python proli.py training.num_epochs=5
+time srun -u python proli.py training.num_epochs=2 experiment_name=test_cp mlflow.run_name=simple
 
 date
