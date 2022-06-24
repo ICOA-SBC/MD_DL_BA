@@ -52,5 +52,3 @@ export PYTHONUSERBASE=$dzc_ALL_CCFRWORK/.local_tf1.2
 
 conda activate tf1.2
 ```
-
-

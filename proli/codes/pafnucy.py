@@ -7,10 +7,10 @@ tfbio : https://gitlab.com/cheminfIBB/tfbio/-/tree/master/tfbio
 
     Typical usage examples:
 
-    model = get_pafnucy()
-    features = make_conv_block(conv_cfg, kconv, kpool)
-    regressor = make_regressor(fc_cfg, dropout_prob)
-    model2 = Pafnucy(features, regressor)
+    >> model = get_pafnucy()
+    >> features = make_conv_block(conv_cfg, kconv, kpool)
+    >> regressor = make_regressor(fc_cfg, dropout_prob)
+    >> model2 = Pafnucy(features, regressor)
 """
 
 # --- built-in python module
