@@ -1,7 +1,7 @@
 """Video Pafnucy class definition : Videonucy.
 
 Code porting of `https://gitlab.com/cheminfIBB/pafnucy` to pytorch/1.11
-ConvLSTM version of Pafnucy, processing a video instead of an image
+ConvLSTM version of Pafnucy, specially made to work with image sequences
 ConvLSTM : https://github.com/ndrplz/ConvLSTM_pytorch
 
     Typical usage examples:
