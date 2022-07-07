@@ -1,5 +1,8 @@
+### IMPORT LIBRARIES
+##### BUILT_IN
 import time
 
+##### EXTERNAL
 import hydra
 from omegaconf import DictConfig
 import torch
@@ -11,6 +14,7 @@ import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data.distributed import DistributedSampler
 
+##### LOCAL
 import idr_torch 
 from codes.videonucy import create_videonucy
 from codes.complex_dataset import Complexes_4DDataset
@@ -18,6 +22,7 @@ from codes.tools import convert_byte
 from codes.transformations import build_rotations
 
 
+### SETUP PROCESS COMMUNICATION
 dist.init_process_group(backend='nccl', 
                         init_method='env://', 
                         world_size=idr_torch.size, 
@@ -26,10 +31,16 @@ dist.init_process_group(backend='nccl',
 torch.cuda.set_device(idr_torch.local_rank)
 
 
+### UTILS
+def master_print(msg):
+    if idr_torch.rank == 0:
+        print(msg)
+        
 def convert_time(seconds):
     return time.strftime("%H:%M:%S", time.gmtime(seconds))
 
 
+### TRAIN
 def train(model, dl, ds_size, cfg, device, batch_size):
     
     ### TRAINING SETUP
@@ -49,10 +60,10 @@ def train(model, dl, ds_size, cfg, device, batch_size):
                  on_trace_ready=tensorboard_trace_handler('./profiler'),
                  profile_memory=True) as prof:
         for epoch in range(cfg.num_epochs):
-            print(f"Epoch {epoch + 1}/{cfg.num_epochs}")
+            master_print(f"Epoch {epoch + 1}/{cfg.num_epochs}")
             time_epoch = time.time()
             for phase in ['train', 'val']:
-                print(f"Phase: {phase} ")
+                master_print(f"Phase: {phase} ")
                 model.train() if phase == 'train' else model.eval()
 
                 running_metrics = 0.0
@@ -76,24 +87,25 @@ def train(model, dl, ds_size, cfg, device, batch_size):
                         optimizer.step()
                     prof.step()
 
+                running_metrics = torch.tensor(running_metrics).to(device)
                 dist.all_reduce(running_metrics, op=dist.ReduceOp.SUM)
-                epoch_metric = running_metrics / ds_size[phase]
+                epoch_metric = running_metrics.cpu().item() / ds_size[phase]
                 if phase == 'train':
-                    print(f"\t[{phase}] MSELoss {epoch_metric:.4f}")
+                    master_print(f"\t[{phase}] MSELoss {epoch_metric:.4f}")
                 else:
-                    print(f"\t[{phase}] MSELoss {epoch_metric:.4f} \t\
-                            Duration: {time.time() - time_epoch:.2f}")
+                    master_print(f"\t[{phase}] MSELoss {epoch_metric:.4f} \t\ 
+                                 Duration: {time.time() - time_epoch:.2f}")
 
                 # check if the model is improving
                 if phase == 'val' and epoch_metric < best_mse:
-                    print(f"/\\ Better loss {best_mse} --> {epoch_metric}")
+                    master_print(f"/\\ Better loss {best_mse} --> {epoch_metric}")
                     best_mse, best_epoch = epoch_metric, epoch
                     patience = 0
                 else:
                     patience += 1
 
             if patience > max_patience:
-                print("----------- Early stopping activated !")
+                master_print("----------- Early stopping activated !")
                 break
                 
     duration = time.time() - time_train
@@ -110,7 +122,7 @@ def main(cfg: DictConfig) -> None:
 
     # create transformations
     rotations_matrices = build_rotations()
-    print(f"Number of available rotations: {len(rotations_matrices)}")
+    master_print(f"Number of available rotations: {len(rotations_matrices)}")
 
     train_ds = Complexes_4DDataset(cfg.io, 
                                    cfg.data_setup, 
