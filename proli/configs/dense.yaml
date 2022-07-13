@@ -2,7 +2,7 @@ mlflow:
   # path to store mlflow experience
   path: ${oc.env:dzc_ALL_CCFRSCRATCH}/proli/mlruns
   # name of the mlflow experience
-  runname: densenucy
+  run_name: densenucy
     
 io:
   # path to train, val and test dataset as h5py files
@@ -33,4 +33,4 @@ network:
   fc_cfg: [10240]
   
 
-name: densenucy_v3_with_systemic_rotation
+experiment_name: densenucy_v3_with_systemic_rotation
