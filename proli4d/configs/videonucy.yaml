@@ -1,0 +1,44 @@
+experiment:
+  name: videonucy_v0
+  run: test1          # mlrun name
+  path: ${oc.env:dzc_ALL_CCFRSCRATCH}/videonucy/mlruns
+  by_complex: true # if false, it is by simulation
+  model_path: ${oc.env:dzc_ALL_CCFRSCRATCH}/videonucy/models/
+  model_name: second_try  
+io:
+  by_complex_dir: ${oc.env:dzc_ALL_CCFRWORK}/version4D/inputs/by_complex
+  by_sim_dir: ${oc.env:dzc_ALL_CCFRWORK}/version4D/inputs/by_sim
+  train_samples: training_samples.txt
+  val_samples: validation_samples.txt
+  test_samples: test_samples.txt
+  affinities:
+    - ${oc.env:dzc_ALL_CCFRWORK}/version4D/inputs/affinities/INDEX_general_PL_data.2019
+    - ${oc.env:dzc_ALL_CCFRWORK}/version4D/inputs/affinities/INDEX_refined_data.2019
+  train_dir: ${oc.env:dzc_ALL_CCFRWORK}/deep_learning/pafnucy/data/4D_data_v1/training_set
+  val_dir: ${oc.env:dzc_ALL_CCFRWORK}/deep_learning/pafnucy/data/4D_data_v1/validation_set
+  test_dir: ${oc.env:dzc_ALL_CCFRWORK}/deep_learning/pafnucy/data/4D_data_v1/test_set
+  
+data_setup:
+  grid_spacing: 1.0  # distance between grid points in angstrom
+  max_dist: 12 # max distance from complex center # TODO still useful 
+  partial_charges:  # previously computed on all simulations from train dataset
+    mean: -0.19513957
+    std: 0.45485657
+  frames: 50  # number of frames to be extracted from each simulation (max 50)
+  keep_frames_in_order: true
+  features: 19
+  
+training:
+  learning_rate: 1e-5 # learning rate
+  weight_decay: 1e-4 # lambda value for L2 regularisation of the loss
+  batch_size: 8 # batch size for one GPU, multi-GPU training
+  num_epochs: 100 # max number of epochs
+  patience: 20 # early stopping
+  
+network:
+  # number of channels before and after each ConvLSTM layer
+  convlstm_cfg: [19, 64, 128, 256]
+  # number of neurons before and after each FullyConnected layer
+  fc_cfg: [16384, 1024, 256]
+  
+debug: false

@@ -2,14 +2,15 @@ experiment:
   name: todo
   by_complex: true # if false, it is by simulation
 io:
-  by_complex_dir: ${oc.env:dzc_CCFRWORK}/version4D/inputs/by_complex
-  by_sim_dir: ${oc.env:dzc_CCFRWORK}/version4D/inputs/by_sim
+io:
+  by_complex_dir: ${oc.env:dzc_ALL_CCFRWORK}/version4D/inputs/by_complex
+  by_sim_dir: ${oc.env:dzc_ALL_CCFRWORK}/version4D/inputs/by_sim
   train_samples: training_samples.txt
   val_samples: validation_samples.txt
   test_samples: test_samples.txt
   affinities:
-    - ${oc.env:dzc_CCFRWORK}/version4D/inputs/affinities/INDEX_general_PL_data.2019
-    - ${oc.env:dzc_CCFRWORK}/version4D/inputs/affinities/INDEX_refined_data.2019
+    - ${oc.env:dzc_ALL_CCFRWORK}/version4D/inputs/affinities/INDEX_general_PL_data.2019
+    - ${oc.env:dzc_ALL_CCFRWORK}/version4D/inputs/affinities/INDEX_refined_data.2019
   train_dir: ${oc.env:dzc_ALL_CCFRWORK}/deep_learning/pafnucy/data/4D_data_v1/training_set
   val_dir: ${oc.env:dzc_ALL_CCFRWORK}/deep_learning/pafnucy/data/4D_data_v1/validation_set
   test_dir: ${oc.env:dzc_ALL_CCFRWORK}/deep_learning/pafnucy/data/4D_data_v1/test_set
