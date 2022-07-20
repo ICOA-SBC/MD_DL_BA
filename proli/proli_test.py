@@ -17,7 +17,7 @@ def convert_time(seconds):
     return time.strftime("%H:%M:%S", time.gmtime(seconds))
 
 
-def test(model, dataloader, no_of_samples):
+def predict(model, dataloader, no_of_samples):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.eval()
     affinities = np.empty(0, dtype=np.float32)

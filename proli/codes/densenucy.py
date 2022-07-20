@@ -6,10 +6,10 @@ DenseNet : https://pytorch.org/hub/pytorch_vision_densenet
 
     Typical usage examples:
 
-    model = get_densenucy()
-    features = make_features(growth_rate, dense_cfg)
-    regressor = make_regressor(fc_cfg)
-    model2 = Densenucy(features, regressor)
+    >> model = get_densenucy()
+    >> features = make_features(growth_rate, dense_cfg)
+    >> regressor = make_regressor(fc_cfg)
+    >> model2 = Densenucy(features, regressor)
 """
 
 # --- built-in python module

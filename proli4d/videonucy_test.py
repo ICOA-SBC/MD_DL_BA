@@ -10,7 +10,7 @@ from omegaconf import DictConfig, OmegaConf
 from torch.utils.data import DataLoader
 
 from codes.complex_dataset import Complexes_4DDataset
-
+from codes.videonucy import Videonucy
 
 def predict(model, dataloader, no_of_samples, device):
     model.eval()
@@ -18,6 +18,8 @@ def predict(model, dataloader, no_of_samples, device):
     predictions = []
 
     for (*inputs, labels) in dataloader:
+        inputs = torch.stack(inputs, dim=1)
+        inputs = inputs.to(device, non_blocking=True)
         with torch.set_grad_enabled(False):
             preds = model(inputs)
 
@@ -43,7 +45,7 @@ def analyse(affinities, predictions):
     return rmse, mae, corr
 
 
-@hydra.main(config_path="./configs", config_name="default")
+@hydra.main(config_path="./configs", config_name="videonucy")
 def main(cfg: DictConfig) -> None:
     # print(OmegaConf.to_yaml(cfg))
     by_complex = cfg.experiment.by_complex
@@ -53,7 +55,7 @@ def main(cfg: DictConfig) -> None:
     model = torch.load(model_path)
 
     dev = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    model.set_device(dev)
+    model.to(dev)
 
     print(f"Model {model_path} loaded")
     # test dataset

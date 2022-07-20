@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --nodes=1
-#SBATCH --job-name=lrplateau
+#SBATCH --job-name=ds2_lrplateau
 #SBATCH --account=sos@v100
 #SBATCH --qos=qos_gpu-t3
 #SBATCH --output=logs/%x.out
@@ -29,6 +29,7 @@ time srun -u python main_train.py training.learning_rate=1e-2 \
             training.batch_size=16 \
             training.num_epochs=100 \
             training.patience=20 \
-            experiment.run=adam_lrplateau
+            experiment.name=datasetv2 \
+            experiment.run=adam_lrp_ds2
 
 date
