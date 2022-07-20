@@ -49,7 +49,7 @@ def main(cfg: DictConfig) -> None:
     by_complex = cfg.experiment.by_complex
     batch_size = cfg.training.batch_size
     # load model
-    model_path = os.path.join(cfg.experiment.model_path, f"{cfg.experiment.model_name}.pth")
+    model_path = os.path.join(cfg.experiment.model_path, f"{cfg.experiment.run}.pth")
     model = torch.load(model_path)
 
     dev = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")

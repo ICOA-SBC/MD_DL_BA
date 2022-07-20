@@ -102,7 +102,7 @@ def train(model, dl, ds_size, cfg, cfg_exp, device, batch_size):
                     master_print(f"/\\ Better loss {best_mse} --> {epoch_metric}")
                     best_mse, best_epoch = epoch_metric, epoch
                     best_model_wts = copy.deepcopy(model.state_dict())
-                    filename = os.path.join(cfg_exp.model_path, f"{cfg_exp.model_name}_{best_mse:.4f}_{best_epoch}.pth")
+                    filename = os.path.join(cfg_exp.model_path, f"{cfg_exp.run}_{best_mse:.4f}_{best_epoch}.pth")
                     print(f"\tsaving model {filename}")
                     torch.save(model, filename)                    
                     patience = 0
@@ -219,7 +219,7 @@ def main(cfg: DictConfig) -> None:
                                     batch_size)
 
         if idr_torch.rank == 0:
-            save_model(model, cfg.experiment.model_path, cfg.experiment.model_name) # the best model is saved without rmse (easier to load for testing)
+            save_model(model, cfg.experiment.model_path, cfg.experiment.run) # the best model is saved without rmse (easier to load for testing)
 
         if idr_torch.rank == 0:
             mlflow.log_param("best_epoch", best_epoch)

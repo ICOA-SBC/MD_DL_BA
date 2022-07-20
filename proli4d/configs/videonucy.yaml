@@ -4,7 +4,7 @@ experiment:
   path: ${oc.env:dzc_ALL_CCFRSCRATCH}/videonucy/mlruns
   by_complex: true # if false, it is by simulation
   model_path: ${oc.env:dzc_ALL_CCFRSCRATCH}/videonucy/models/
-  model_name: second_try  
+
 io:
   by_complex_dir: ${oc.env:dzc_ALL_CCFRWORK}/version4D/inputs/by_complex
   by_sim_dir: ${oc.env:dzc_ALL_CCFRWORK}/version4D/inputs/by_sim
