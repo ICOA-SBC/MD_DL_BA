@@ -19,14 +19,14 @@ class CNN_FCN_LSTM(nn.Module):
 
         self.fcn1 = self.fc_layer(256 * 3 * 3 * 3, 256 * 3)
         self.fcn2 = self.fc_layer(256 * 3, 256)
-        self.fcn3 = nn.Sequential(nn.Linear(256, 1))  # TODO try without ?
+        self.fcn3 = nn.Sequential(nn.Linear(256, 2)) 
 
         # LSTM declaration (input_size depends on lasty fcn)
         self.input_size = in_channels_per_frame  # number of features
         self.hidden_size = 10  # number of features in hidden state
         self.num_layers = 1
 
-        self.lstm = nn.LSTM(input_size=self.in_frames, hidden_size=self.hidden_size,
+        self.lstm = nn.LSTM(input_size=self.in_frames*2, hidden_size=self.hidden_size,
                             num_layers=self.num_layers, batch_first=True)
         # hidden size is also output_size
         self.dropout = nn.Dropout(0.2)  # TODO parameter
@@ -107,7 +107,7 @@ class CNN_FCN_LSTM(nn.Module):
             nn.Linear(in_c, out_c),
             nn.LeakyReLU(),
             # nn.Tanh(),
-            nn.Dropout(p=0.5)
+            nn.Dropout(p=0.4)
             # nn.BatchNorm1d(out_c)
         )
         return fc_layer

@@ -9,7 +9,7 @@ import torch.optim as optim
 from omegaconf import DictConfig, OmegaConf
 from torch.utils.data import DataLoader
 
-from codes.cnn_fcn_lstm import CNN_FCN_LSTM
+from codes.cnn_fcn2_lstm import CNN_FCN_LSTM
 from codes.complex_dataset import Complexes_4DDataset
 from codes.tools import convert_byte
 from codes.transformations import build_rotations
@@ -39,7 +39,7 @@ def train(model, dl, ds_size, cfg_train, cfg_exp, device):
             model.train() if phase == 'train' else model.eval()
 
             running_metrics = 0.0
-            k=0
+
             for (*inputs, labels) in dl[phase]:
                 labels = labels.to(device)
                 optimizer.zero_grad()
@@ -53,8 +53,7 @@ def train(model, dl, ds_size, cfg_train, cfg_exp, device):
                 if phase == 'train':
                     loss.backward()
                     optimizer.step()
-                print(f"{k}")
-                k+=1
+
             epoch_metric = running_metrics / ds_size[phase]
             if phase == 'train':
                 print(f"\t[{phase}] MSELoss {epoch_metric:.4f}")
@@ -68,7 +67,7 @@ def train(model, dl, ds_size, cfg_train, cfg_exp, device):
                 print(f"/\\ Better loss {best_mse} --> {epoch_metric}")
                 best_mse, best_epoch = epoch_metric, epoch
                 best_model_wts = copy.deepcopy(model.state_dict())
-                filename = os.path.join(cfg_exp.model_path, f"{cfg_exp.run}_{best_mse:.4f}_{best_epoch}.pth")
+                filename = os.path.join(cfg_exp.model_path, f"{cfg_exp.model_name}_{best_mse:.4f}_{best_epoch}.pth")
                 print(f"\tsaving model {filename}")
                 torch.save(model, filename)
                 patience = 0
@@ -123,7 +122,7 @@ def mlflow_setup(cfg):
     mlflow.log_artifact("configuration.yaml")
 
 
-@hydra.main(config_path="./configs", config_name="default_datasetv2")
+@hydra.main(config_path="./configs", config_name="default")
 def main(cfg: DictConfig) -> None:
     # print(OmegaConf.to_yaml(cfg))
     by_complex = cfg.experiment.by_complex
@@ -164,7 +163,7 @@ def main(cfg: DictConfig) -> None:
         # train
         best_model, best_epoch = train(model, dl, ds_size, cfg.training, cfg.experiment, dev)
 
-        save_model(model, cfg.experiment.model_path, cfg.experiment.run)
+        save_model(model, cfg.experiment.model_path, cfg.experiment.model_name)
 
         # test
         test_ds = Complexes_4DDataset(cfg.io, cfg.data_setup, by_complex, mode="test", debug=cfg.debug)
