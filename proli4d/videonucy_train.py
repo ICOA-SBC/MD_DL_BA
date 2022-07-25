@@ -15,7 +15,6 @@ from torch.profiler import profile, tensorboard_trace_handler, ProfilerActivity,
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data.distributed import DistributedSampler
-
 ##### LOCAL
 import idr_torch 
 from codes.videonucy import create_videonucy
@@ -41,6 +40,23 @@ def master_print(msg):
 def convert_time(seconds):
     return time.strftime("%H:%M:%S", time.gmtime(seconds))
 
+def save_model(model, model_path, model_name):
+    filename = os.path.join(model_path, f"{model_name}.pth")
+    print(f"\t\t\tSaving model {filename}")
+    torch.save(model, filename)
+    
+def mlflow_setup(cfg):
+    mlflow.log_param("n_frames", cfg.data_setup.frames)
+    mlflow.log_param("learning_rate", cfg.training.learning_rate)
+    mlflow.log_param("weight_decay", cfg.training.weight_decay)
+    mlflow.log_param("batch_size", cfg.training.batch_size * idr_torch.size)
+    mlflow.log_param("patience", cfg.training.patience)
+    mlflow.log_param("max_epoch", cfg.training.num_epochs)
+    # log configuration as an artefact
+    with open('./configuration.yaml', 'w') as f:
+        f.write(OmegaConf.to_yaml(cfg))
+    mlflow.log_artifact("configuration.yaml")
+
 
 ### TRAIN
 def train(model, dl, ds_size, cfg, cfg_exp, device, batch_size):
@@ -58,14 +74,14 @@ def train(model, dl, ds_size, cfg, cfg_exp, device, batch_size):
     ### TRAINING PHASE
     time_train = time.time()
     with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA],
-                 schedule=schedule(wait=1, warmup=1, active=12, repeat=5),
+                 schedule=schedule(wait=1, warmup=3, active=12, repeat=5),
                  on_trace_ready=tensorboard_trace_handler('./profiler'),
                  profile_memory=True) as prof:
         for epoch in range(cfg.num_epochs):
             master_print(f"Epoch {epoch + 1}/{cfg.num_epochs}")
             time_epoch = time.time()
             for phase in ['train', 'val']:
-                master_print(f"Phase: {phase} ")
+                master_print(f"\tPhase {phase} ")
                 model.train() if phase == 'train' else model.eval()
 
                 running_metrics = 0.0
@@ -87,24 +103,27 @@ def train(model, dl, ds_size, cfg, cfg_exp, device, batch_size):
                     if phase == 'train':
                         loss.backward()
                         optimizer.step()
-                    prof.step()
+                        prof.step()
 
                 running_metrics = torch.tensor(running_metrics).to(device)
                 dist.all_reduce(running_metrics, op=dist.ReduceOp.SUM)
                 epoch_metric = running_metrics.cpu().item() / ds_size[phase]
                 if phase == 'train':
-                    master_print(f"\t[{phase}] MSELoss {epoch_metric:.4f}")
+                    master_print(f"\t\t[{phase}] MSELoss {epoch_metric:.4f}")
                 else:
-                    master_print(f"\t[{phase}] MSELoss {epoch_metric:.4f} \t Duration: {time.time() - time_epoch:.2f}")
+                    master_print(f"\t\t[{phase}] MSELoss {epoch_metric:.4f}\
+                    \t Duration: {time.time() - time_epoch:.2f}")
 
                 # check if the model is improving
                 if phase == 'val' and epoch_metric < best_mse:
-                    master_print(f"/\\ Better loss {best_mse} --> {epoch_metric}")
+                    master_print(f"\t\t/Better loss {best_mse} --> {epoch_metric}\\")
                     best_mse, best_epoch = epoch_metric, epoch
                     best_model_wts = copy.deepcopy(model.state_dict())
-                    filename = os.path.join(cfg_exp.model_path, f"{cfg_exp.run}_{best_mse:.4f}_{best_epoch}.pth")
-                    print(f"\tsaving model {filename}")
-                    torch.save(model, filename)                    
+                    if idr_torch.rank == 0:
+                        save_model(model, 
+                                   cfg_exp.model_path,
+                                   f"{cfg_exp.name}_{cfg_exp.run}_\
+                                   {best_mse:.4f}_{best_epoch}")                 
                     patience = 0
                 else:
                     patience += 1
@@ -122,22 +141,6 @@ def train(model, dl, ds_size, cfg, cfg_exp, device, batch_size):
 
     model.load_state_dict(best_model_wts)
     return model, best_epoch
-
-
-def save_model(model, model_path, model_name):
-    filename = os.path.join(model_path, f"{model_name}.pth")
-    print(f"\tsaving model {filename}")
-    torch.save(model, filename)
-
-
-def mlflow_setup(cfg):
-    mlflow.log_param("learning_rate", cfg.training.learning_rate)
-    mlflow.log_param("patience", cfg.training.patience)
-    mlflow.log_param("max_epoch", cfg.training.num_epochs)
-    # log configuration as an artefact
-    with open('./configuration.yaml', 'w') as f:
-        f.write(OmegaConf.to_yaml(cfg))
-    mlflow.log_artifact("configuration.yaml")
 
 
 @hydra.main(config_path="./configs", config_name="videonucy")
@@ -207,24 +210,23 @@ def main(cfg: DictConfig) -> None:
 
 
     with mlflow.start_run(run_name=cfg.experiment.run) as run:
+        
         if idr_torch.rank == 0:
             mlflow_setup(cfg)
-        # train
-        best_model, best_epoch = train(ddp_model, 
-                                    dl, 
-                                    ds_size, 
-                                    cfg.training,
-                                    cfg.experiment, 
-                                    dev,
-                                    batch_size)
+        
+        best_model, best_epoch = train(ddp_model,
+                                       dl, 
+                                       ds_size, 
+                                       cfg.training,
+                                       cfg.experiment, 
+                                       dev,
+                                       batch_size)
 
         if idr_torch.rank == 0:
-            save_model(model, cfg.experiment.model_path, cfg.experiment.run) # the best model is saved without rmse (easier to load for testing)
-
-        if idr_torch.rank == 0:
+            # the best model is saved without rmse (easier to load for testing)
+            save_model(model, cfg.experiment.model_path, cfg.experiment.model_name) 
             mlflow.log_param("best_epoch", best_epoch)
-
-    master_print(f"GPU usage: {convert_byte(cuda.max_memory_allocated(device=None))}")
+            print(f"GPU usage: {convert_byte(cuda.max_memory_allocated(device=None))}")
 
 
 if __name__ == "__main__":
