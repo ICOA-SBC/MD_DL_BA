@@ -1,10 +1,10 @@
 experiment:
-  name: videonucy_v0
-  run: test1          # mlrun name
+  name: videonucy_v2
+  run: training0  # mlflow runname
   path: ${oc.env:dzc_ALL_CCFRSCRATCH}/videonucy/mlruns
-  by_complex: true # if false, it is by simulation
+  by_complex: true  # if false, it is by simulation
   model_path: ${oc.env:dzc_ALL_CCFRSCRATCH}/videonucy/models/
-
+  
 io:
   by_complex_dir: ${oc.env:dzc_ALL_CCFRWORK}/version4D/inputs/by_complex
   by_sim_dir: ${oc.env:dzc_ALL_CCFRWORK}/version4D/inputs/by_sim
@@ -20,7 +20,7 @@ io:
   
 data_setup:
   grid_spacing: 1.0  # distance between grid points in angstrom
-  max_dist: 12 # max distance from complex center # TODO still useful 
+  max_dist: 12  # max distance from complex center # TODO still useful 
   partial_charges:  # previously computed on all simulations from train dataset
     mean: -0.19513957
     std: 0.45485657
@@ -29,16 +29,16 @@ data_setup:
   features: 19
   
 training:
-  learning_rate: 1e-5 # learning rate
-  weight_decay: 1e-4 # lambda value for L2 regularisation of the loss
-  batch_size: 8 # batch size for one GPU, multi-GPU training
-  num_epochs: 100 # max number of epochs
-  patience: 20 # early stopping
+  learning_rate: 1e-5  # learning rate
+  weight_decay: 1e-4  # lambda value for L2 regularisation of the loss
+  batch_size: 8  # batch size for one GPU, multi-GPU training
+  num_epochs: 100  # max number of epochs
+  patience: 20  # early stopping
   
 network:
   # number of channels before and after each ConvLSTM layer
-  convlstm_cfg: [19, 64, 128, 256]
+  convlstm_cfg: [19, 32, 64, 128]
   # number of neurons before and after each FullyConnected layer
-  fc_cfg: [16384, 1024, 256]
+  fc_cfg: [8192, 256]
   
 debug: false
