@@ -89,6 +89,7 @@ class Complexes_4DDataset(Dataset):
         # A simulation contains 50 frames
         sample_filename = self.samples_list[idx]
         pdb_name = self.get_pdb_name(sample_filename)
+
         if self.by_complex:
             # randomly select one sim
             list_of_sims = [f for f in os.listdir(sample_filename) if f.endswith('.npy')]
@@ -121,7 +122,7 @@ class Complexes_4DDataset(Dataset):
             selected_frames = sorted(selected_frames)
         for f in selected_frames:
             volume = frame.get_frame(frames[f])
-            volume = from_numpy(volume)
             inputs.append(volume)
-
-        return *inputs, affinity
+        inputs = np.stack(inputs, axis=0)
+        inputs = from_numpy(inputs)
+        return inputs, affinity
