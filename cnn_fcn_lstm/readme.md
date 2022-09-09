@@ -46,9 +46,9 @@ export OUTPUT_PATH=$dzc_CCFRWORK/version4D/inputs_v3/
 mkdir -p $OUTPUT_PATH/{by_complex,by_sim}
 
 # by_complex
-find $INPUT_PATH/training_set/ -type d -printf '%f\n' | tee $OUTPUT_PATH/by_complex/training_samples.txt
-find $INPUT_PATH/test_set/ -type d -printf '%f\n' | tee $OUTPUT_PATH/by_complex/test_samples.txt
-find $INPUT_PATH/validation_set/ -type d -printf '%f\n' | tee $OUTPUT_PATH/by_complex/validation_samples.txt
+ls $INPUT_PATH/training_set/ > $OUTPUT_PATH/by_complex/training_samples.txt
+ls $INPUT_PATH/test_set/ > $OUTPUT_PATH/by_complex/test_samples.txt
+ls $INPUT_PATH/validation_set/ > $OUTPUT_PATH/by_complex/validation_samples.txt
 
 # by_sim
 cd  $INPUT_PATH/training_set/
@@ -58,8 +58,6 @@ find  -type f -name '*.npy' | tee  $OUTPUT_PATH/by_sim/test_samples.txt
 cd  $INPUT_PATH/validation_set/
 find  -type f -name '*.npy' | tee  $OUTPUT_PATH/by_sim/validation_samples.txt
 ```
-
-> Attention: first line of each `by_complex/xxx_samples.txt` has to be deleted!
 
 Don't forget to update the paths to theses files in the `yaml` config file
 
