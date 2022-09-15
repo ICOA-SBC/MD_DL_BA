@@ -87,6 +87,7 @@ python main_compute_charges.py
 Output:
 
 ```
+Version 3:
 (pytorch-gpu-1.11.0+py3.9.12) bash-4.4$ python main_compute_charges.py 
 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 820/820 [00:42<00:00, 19.38it/s]
 Charges : (21007124,) elements in 820 samples
@@ -101,6 +102,27 @@ Charges : (697408084,) elements in 28907 samples
 Charges on dataset *** train ***: mean= -0.19279409 std= 0.48856917
         Please update your yaml file with theses values!
 Duration: 00:26:08
+
+Version 4:
+(pytorch-gpu-1.11.0+py3.9.12) bash-4.4$ python main_compute_charges.py
+Computing on test dataset -------------
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 830/830 [00:35<00:00, 23.35it/s]
+Charges : (21019844,) elements in 830 samples
+Charges on dataset *** test ***: mean= -0.18746309 std= 0.44717112
+Duration: 00:00:36
+
+Computing on valid dataset -------------
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 10395/10395 [07:24<00:00, 23.38it/s]
+Charges : (259859568,) elements in 10395 samples
+Charges on dataset *** valid ***: mean= -0.18522244 std= 0.46666227
+Duration: 00:07:38
+
+Computing on train dataset -------------
+100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 41544/41544 [29:12<00:00, 23.71it/s]
+Charges : (966421624,) elements in 41544 samples
+Charges on dataset *** train ***: mean= -0.19436523 std= 0.65582558
+	Please update your yaml file with theses values!
+Duration: 00:30:01
 ```
 
 ## Model architecture
