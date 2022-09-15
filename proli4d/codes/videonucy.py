@@ -256,7 +256,7 @@ def make_regressor(fc_cfg: List[int]) -> nn.Sequential:
     for i, out_neurons in enumerate(fc_cfg[1:], 1):
         fc_block = nn.Sequential()
         linear = nn.Linear(in_neurons, out_neurons)
-        batchnorm = nn.BatchNorm1d(num_features=out_neurons)
+        batchnorm = nn.SyncBatchNorm(num_features=out_neurons)
         relu = nn.ReLU()
         fc_block.add_module('linear', linear)
         fc_block.add_module('batchnorm', batchnorm)

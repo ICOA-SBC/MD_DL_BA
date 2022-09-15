@@ -81,11 +81,10 @@ def train(model, dl, ds_size, cfg, cfg_exp, device, batch_size):
             master_print(f"Epoch {epoch + 1}/{cfg.num_epochs}")
             time_epoch = time.time()
             for phase in ['train', 'val']:
-                master_print(f"\tPhase {phase} ")
+                master_print(f"\tPhase {phase}")
                 model.train() if phase == 'train' else model.eval()
 
                 running_metrics = 0.0
-
                 for (*inputs, labels) in dl[phase]:
                     inputs = torch.stack(inputs, dim=1)
                     inputs = inputs.to(device, non_blocking=True)
@@ -105,6 +104,7 @@ def train(model, dl, ds_size, cfg, cfg_exp, device, batch_size):
                         optimizer.step()
                         prof.step()
 
+                master_print(f"\tPhase {phase} end")
                 running_metrics = torch.tensor(running_metrics).to(device)
                 dist.all_reduce(running_metrics, op=dist.ReduceOp.SUM)
                 epoch_metric = running_metrics.cpu().item() / ds_size[phase]
@@ -122,11 +122,11 @@ def train(model, dl, ds_size, cfg, cfg_exp, device, batch_size):
                     if idr_torch.rank == 0:
                         save_model(model, 
                                    cfg_exp.model_path,
-                                   f"{cfg_exp.name}_{cfg_exp.run}_\
-                                   {best_mse:.4f}_{best_epoch}")                 
+                                   f"{cfg_exp.name}_{cfg_exp.run}_{best_mse:.4f}_{best_epoch}")                 
                     patience = 0
                 else:
                     patience += 1
+                    master_print(patience)
 
                 if idr_torch.rank == 0:
                     mlflow.log_metric(f"{phase}_mse", epoch_metric, epoch)
@@ -224,7 +224,7 @@ def main(cfg: DictConfig) -> None:
 
         if idr_torch.rank == 0:
             # the best model is saved without rmse (easier to load for testing)
-            save_model(model, cfg.experiment.model_path, cfg.experiment.model_name) 
+            save_model(model, cfg.experiment.model_path, f"{cfg.experiment.name}_{cfg.experiment.run}") 
             mlflow.log_param("best_epoch", best_epoch)
             print(f"GPU usage: {convert_byte(cuda.max_memory_allocated(device=None))}")
 

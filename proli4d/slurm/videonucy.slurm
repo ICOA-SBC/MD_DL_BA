@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=videonucy_training
-#SBATCH --account=dzc@v100
+#SBATCH --account=sos@v100
 #SBATCH --qos=qos_gpu-t3
 #SBATCH --output=logs/%x.out
 #SBATCH --error=logs/%x.err
@@ -14,7 +14,7 @@
 
 module purge
 module load pytorch-gpu/py3/1.11.0
-export PYTHONUSERBASE=$WORK/.local_convlstm
+export PYTHONUSERBASE=$dzc_CCFRWORK/.local_convlstm
 export PATH=$PYTHONUSERBASE/bin:$PATH
 
 # avoids warning from mlflow
@@ -29,10 +29,10 @@ time srun -u python videonucy_train.py \
             experiment.run=training1 \
             experiment.by_complex=false \
             training.learning_rate=1e-4 \
-            training.weight_decay=1e-6 \
-            data_setup.frames=30 \
+            training.weight_decay=1e-7 \
+            data_setup.frames=50 \
             training.batch_size=12 \
-            training.num_epochs=90 \
+            training.num_epochs=100 \
             training.patience=20
 
 date
