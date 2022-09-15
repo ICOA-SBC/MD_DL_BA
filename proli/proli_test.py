@@ -4,6 +4,7 @@ import time
 import hydra
 import numpy as np
 import scipy
+from scipy import stats
 import torch
 from omegaconf import DictConfig, OmegaConf
 from torch.utils.data import DataLoader
@@ -51,6 +52,7 @@ def analyse(affinities, predictions):
         mae= {mae}
         corr= {corr}
     """)
+    return rmse, mae, corr
 
 
 @hydra.main(config_path="./configs", config_name="default_test")
@@ -77,10 +79,10 @@ def my_app(cfg: DictConfig) -> None:
                                  persistent_workers=True)
 
     # apply model on test
-    affinities, predictions = test(model, test_dataloader, len(test_dataset))
+    affinities, predictions = predict(model, test_dataloader, len(test_dataset))
 
     # compute metrics
-    analyse(affinities, predictions)
+    _,_,_= analyse(affinities, predictions)
 
 
 if __name__ == "__main__":

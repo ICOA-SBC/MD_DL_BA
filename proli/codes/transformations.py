@@ -130,4 +130,6 @@ def convert_to_grid(coords, features, grid_resolution=1.0, max_dist=10.0):
     for (x, y, z), f in zip(grid_coords[in_box], features[in_box]):
         grid[x, y, z] += f
 
+    #print(f"Convert_to_grid: {coords.shape} et {features.shape}")
+
     return grid

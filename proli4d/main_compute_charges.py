@@ -77,6 +77,8 @@ if __name__ == "__main__":
     main()
 
 """
+dataset v1
+
 Results :
 (pytorch-gpu-1.11.0+py3.9.12) bash-4.4$ python main_compute_charges.py 
 Reading 15836 samples
@@ -89,16 +91,12 @@ Reading 790 samples
 Charges : (20307671,) elements in 790 samples
 Charges on dataset Test: mean= -0.18548983 std= 0.44664063
 
-
-
 Data set original (3D)
 partialcharge:
   m: -0.1401471346616745
   std: 0.4216829240322113 
 
-"""
 
-'''
 dataset v2
 
 (pytorch-gpu-1.11.0+py3.9.12) bash-4.4$ python main_compute_charges.py 
@@ -113,4 +111,16 @@ Charges : (590542187,) elements in 24484 samples
 Charges on dataset Train: mean= -0.19319045 std= 0.45451332
 
 
-'''
+dataset v3
+
+(pytorch-gpu-1.11.0+py3.9.12) bash-4.4$ python main_compute_charges.py
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 820/820 [00:33<00:00, 24.15it/s]
+Charges : (21007124,) elements in 820 samples
+Charges on dataset Train: mean= -0.18692062 std= 0.44705638
+100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 7233/7233 [04:55<00:00, 24.51it/s]
+Charges : (186706683,) elements in 7233 samples
+Charges on dataset Train: mean= -0.18240544 std= 0.47032203
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 28907/28907 [20:13<00:00, 23.82it/s]
+Charges : (697408084,) elements in 28907 samples
+Charges on dataset Train: mean= -0.19279409 std= 0.48856917
+"""
