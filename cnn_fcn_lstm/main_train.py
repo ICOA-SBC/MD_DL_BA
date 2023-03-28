@@ -1,18 +1,23 @@
-import copy
-import os
+### IMPORT LIBRARIES
+##### BUILT_IN
 import time
-
-import hydra
+import os
+import copy
 import mlflow
+import seaborn as sns
+import pandas as pd
+import numpy as np
+##### EXTERNAL
+import hydra
+from omegaconf import DictConfig, OmegaConf
 import torch
+import torch.optim as optim
 import torch.distributed as dist
 import torch.nn as nn
-import torch.optim as optim
-from omegaconf import DictConfig, OmegaConf
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
-
+##### LOCAL
 from codes.cnn_fcn_lstm import CNN_FCN_LSTM
 from codes.complex_dataset import Complexes_4DDataset
 from codes.tools import Distribution as DIST
@@ -21,6 +26,7 @@ from codes.transformations import build_rotations
 from main_test import analyse, predict
 
 
+### SETUP PROCESS COMMUNICATION
 def setup():
     DIST()
     dist.init_process_group(backend='nccl',
@@ -29,10 +35,26 @@ def setup():
                             rank=DIST.rank)
     torch.cuda.set_device(DIST.local_rank)
 
-
 def cleanup():
     dist.destroy_process_group()
 
+
+### UTILS
+def load_model(cfg, dev):
+    if cfg.network.pretrained_path == 'True':
+        filename = os.path.join(cfg.experiment.model_path, f"{cfg.experiment.run}.pth")
+    else:
+        filename = f"{cfg.network.pretrained_path.strip('.pth')}.pth"
+    print(f"\tloading model {filename}")
+    checkpoint = torch.load(filename, map_location=dev)
+    model = CNN_FCN_LSTM(in_frames=cfg.data_setup.frames,
+                         in_channels_per_frame=cfg.data_setup.features,
+                         model_architecture=cfg.model.architecture)
+
+    model.load_state_dict(checkpoint['model'])
+    print(f"Model successfully loaded")
+    model.to(dev)
+    return model
 
 def save_model(model, epoch, model_name, cfg, optimizer=None, lr_scheduler=None):
     filename = os.path.join(cfg.experiment.model_path, f"{model_name}.pth")
@@ -57,7 +79,10 @@ def save_model(model, epoch, model_name, cfg, optimizer=None, lr_scheduler=None)
     torch.save(checkpoint, filename)
 
 
+### TRAIN
 def train(model, dl, ds_size, cfg, device):
+
+    ### TRAINING SETUP
     cfg_train, cfg_exp = cfg.training, cfg.experiment
     best_mse, best_epoch = 100, -1
     patience, max_patience = 0, cfg_train.patience
@@ -77,7 +102,7 @@ def train(model, dl, ds_size, cfg, device):
 
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.5, patience=10, cooldown=2,
                                                      verbose=True)
-
+    ### TRAINING PHASE
     time_train = time.time()
 
     for epoch in range(cfg_train.num_epochs):
@@ -97,6 +122,7 @@ def train(model, dl, ds_size, cfg, device):
                 with torch.set_grad_enabled(phase == 'train'):
                     outputs = model(inputs)
                     loss = criterion(outputs.float(), affinities.float())
+
                     # statistics
                     running_metrics += metric(outputs, affinities)
 
@@ -125,17 +151,17 @@ def train(model, dl, ds_size, cfg, device):
                 master_print(
                     f"Current learning rate on GPU {DIST.rank}: wu \t{scheduler_wu.get_last_lr()} (from scheduler_wu)")
 
-            # deep copy the model
-            if phase == 'val' and epoch_metric < best_mse:
-                master_print(f"*** /\\ Better loss {best_mse} --> {epoch_metric}")
-                best_mse, best_epoch = epoch_metric, epoch
-                best_model_wts = copy.deepcopy(model.state_dict())
-                if DIST.master_rank:
-                    model_name = f"{cfg_exp.run}_{best_mse:.4f}_{best_epoch}"
-                    save_model(model, best_epoch, model_name, cfg, optimizer, scheduler)
-                patience = 0
-            else:
-                if phase == 'train':
+            # check if the model is improving
+            if phase == 'val':
+                if epoch_metric < best_mse:
+                    master_print(f"*** /\\ Better loss {best_mse} --> {epoch_metric}")
+                    best_mse, best_epoch = epoch_metric, epoch
+                    best_model_wts = copy.deepcopy(model.state_dict())
+                    if DIST.master_rank:
+                        model_name = f"{cfg_exp.run}_{best_mse:.4f}_{best_epoch}"
+                        save_model(model, best_epoch, model_name, cfg, optimizer, scheduler)
+                    patience = 0
+                else:
                     patience += 1
 
             mlflow.log_metric(f"{phase}_mse", epoch_metric, epoch)
@@ -151,7 +177,7 @@ def train(model, dl, ds_size, cfg, device):
 
     model.load_state_dict(best_model_wts)
 
-    return model, best_epoch
+    return model, best_epoch, best_mse
 
 
 def test(model, test_dataloader, test_samples, device):
@@ -182,10 +208,11 @@ def mlflow_setup(cfg):
         mlflow.log_artifact("configuration.yaml")
 
 
-@hydra.main(config_path="./configs", config_name="default_datasetv3")
+@hydra.main(config_path="./configs", config_name=f"default_datasetv4")
 def main(cfg: DictConfig) -> None:
-    dev = torch.device("cuda")
+    dev = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     torch.cuda.set_device(DIST.local_rank)
+    work = os.environ['WORK']
 
     master_print(f"Training with {DIST.size} gpu !")
 
@@ -216,11 +243,14 @@ def main(cfg: DictConfig) -> None:
                         num_workers=4, pin_memory=True, sampler=val_sampler)
     dl = {'train': train_dl, 'val': val_dl}
 
-    model = CNN_FCN_LSTM(in_frames=cfg.data_setup.frames,
+    if cfg.network.pretrained_path: #TRUE or Path
+        model = load_model(cfg, dev)
+    else:
+        model = CNN_FCN_LSTM(in_frames=cfg.data_setup.frames,
                          in_channels_per_frame=cfg.data_setup.features,
                          model_architecture=cfg.model.architecture)
     model.to(DIST.local_rank)
-    # Convert BatchNorm to SyncBatchNorm. 
+    # Convert BatchNorm to SyncBatchNorm.
     model = nn.SyncBatchNorm.convert_sync_batchnorm(model)
 
     ddp_model = DDP(model, device_ids=[DIST.local_rank])
@@ -238,7 +268,7 @@ def main(cfg: DictConfig) -> None:
         mlflow_setup(cfg)
 
         # train
-        best_model, best_epoch = train(ddp_model, dl, ds_size, cfg, DIST.local_rank)
+        best_model, best_epoch, best_MSE = train(ddp_model, dl, ds_size, cfg, DIST.local_rank)
 
         if DIST.master_rank:
             print("Saving best model")
@@ -246,21 +276,69 @@ def main(cfg: DictConfig) -> None:
 
         # test on one GPU (for simplicity)
         if DIST.master_rank:
-            test_ds = Complexes_4DDataset(cfg.io, cfg.data_setup, by_complex, mode="test", debug=cfg.debug)
+            if cfg.network.sim_test:
+                test_ds = Complexes_4DDataset(cfg.io, cfg.data_setup, by_complex=False, mode="test", debug=cfg.debug) #test on all simulation from test set
+            else:
+                test_ds = Complexes_4DDataset(cfg.io, cfg.data_setup, by_complex=True, mode="test", debug=cfg.debug)
             test_dl = DataLoader(test_ds, batch_size=batch_size * 2, shuffle=False, num_workers=4, pin_memory=True,
                                  persistent_workers=True)
             print(f"--------------------- Running test")
             test(best_model.module, test_dl, len(test_ds), dev)
             print(f"--------------------- Running predict")
             affinities, predictions = predict(best_model.module, test_dl, len(test_ds), dev)
-            rmse, mae, corr = analyse(affinities, predictions)
+
+            if cfg.network.mean_test:
+                pdbs = [pdb.split('/')[11] for pdb in test_ds.samples_list]
+                assert len(affinities) == len(pdbs)
+                Daffinities = {}
+                Dpredictions = {}
+                for i,pdb in enumerate(pdbs):
+                    if not pdb in Daffinities:
+                        Daffinities[pdb] = affinities[i]
+                        Dpredictions[pdb] = [predictions[i]]
+                    else:
+                        Dpredictions[pdb].append(predictions[i])
+
+                mean_affinities = np.array([np.mean(Laffinities) for Laffinities in Daffinities.values()])
+                mean_predictions = np.array([np.mean(Lpredictions) for Lpredictions in Dpredictions.values()])
+
+                DFresults= pd.DataFrame([Daffinities,Dpredictions]).T
+                DFresults.columns= ['real','predictions']
+                DFmean = DFresults.applymap(np.mean)
+                DFmean = DFmean.round(2)
+                DFresults['mean_pred'] = DFmean['predictions']
+
+                DFresults.to_csv(f'{work}/deep_learning/MD_ConvLSTM/cnn_fcn_lstm/correlation_plot/CNN-LSTM_mean_{cfg.experiment.run}.csv')
+
+                rmse, mae, corr = analyse(mean_affinities, mean_predictions)
+            else:
+                rmse, mae, corr = analyse(affinities, predictions)
 
             mlflow.log_param("best_epoch", best_epoch)
+            mlflow.log_metric("best_val_MSELoss", best_MSE)
             mlflow.log_metric("test_rmse", rmse)
             mlflow.log_metric("test_mae", mae)
             mlflow.log_metric("test_r", corr[0])
 
             mlflow.pytorch.log_model(best_model, "model")
+
+            Lrun_name = cfg.experiment.run.replace('-',' ').split('_')
+            if cfg.network.mean_test:
+                grid = sns.jointplot(x=mean_affinities, y=mean_predictions, space=0.0, height=3, s=10, edgecolor='w', ylim=(0, 16), xlim=(0, 16),alpha=.5)
+            else:
+                grid = sns.jointplot(x=affinities, y=predictions, space=0.0, height=3, s=10, edgecolor='w', ylim=(0, 16), xlim=(0, 16),alpha=.5)
+            grid.ax_joint.text(0.5, 11, f'cnn-lstm {Lrun_name[2]}\nR= {corr[0]:.2f} - RMSE= {rmse:.2f}\n{Lrun_name[0]}\n{Lrun_name[1]}',size=8)
+            grid.set_axis_labels('real','predicted',size=8)
+            grid.ax_joint.set_xticks(range(0, 16, 5))
+            grid.ax_joint.set_yticks(range(0, 16, 5))
+            grid.ax_joint.xaxis.set_label_coords(0.5,-0.13)
+            grid.ax_joint.yaxis.set_label_coords(-0.15,0.5)
+            if cfg.network.mean_test:
+                grid.fig.savefig(f'{work}/deep_learning/MD_ConvLSTM/cnn_fcn_lstm/correlation_plot/CNN-LSTM_mean_{cfg.experiment.run}.pdf')
+            elif cfg.network.sim_test:
+                grid.fig.savefig(f'{work}/deep_learning/MD_ConvLSTM/cnn_fcn_lstm/correlation_plot/CNN-LSTM_all_{cfg.experiment.run}.pdf')
+            else:
+                grid.fig.savefig(f'{work}/deep_learning/MD_ConvLSTM/cnn_fcn_lstm/correlation_plot/CNN-LSTM_random_{cfg.experiment.run}.pdf')
 
     gpu_memory = torch.cuda.max_memory_allocated()
     print(f"--\nGPU usage on GPU {DIST.local_rank}: {convert_byte(gpu_memory)}\n--")

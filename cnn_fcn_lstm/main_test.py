@@ -1,5 +1,6 @@
 import os
-
+import seaborn as sns
+import pandas as pd
 import hydra
 import numpy as np
 import scipy
@@ -12,7 +13,6 @@ from torch.utils.data import DataLoader
 from codes.cnn_fcn_lstm import CNN_FCN_LSTM
 from codes.complex_dataset import Complexes_4DDataset
 from codes.tools import Distribution as DIST
-
 
 def setup():
     # use slurm variables
@@ -30,7 +30,10 @@ def cleanup():
 
 
 def load_model(cfg, dev):
-    filename = os.path.join(cfg.experiment.model_path, f"{cfg.experiment.run}.pth")
+    if cfg.network.pretrained_path == 'True':
+        filename = os.path.join(cfg.experiment.model_path, f"{cfg.experiment.run}.pth")
+    else:
+        filename = f"{cfg.network.pretrained_path.strip('.pth')}.pth"
     print(f"\tloading model {filename}")
     checkpoint = torch.load(filename, map_location=dev)
     model = CNN_FCN_LSTM(in_frames=cfg.data_setup.frames,
@@ -38,7 +41,6 @@ def load_model(cfg, dev):
                          model_architecture=cfg.model.architecture)
 
     model.load_state_dict(checkpoint['model'])
-    epoch = checkpoint['epoch'] + 1
     print(f"Model successfully loaded")
     model.to(dev)
     return model
@@ -78,9 +80,10 @@ def analyse(affinities, predictions):
     return rmse, mae, corr
 
 
-@hydra.main(config_path="./configs", config_name="default_datasetv3")
+@hydra.main(config_path="./configs", config_name=f"default_datasetv4")
 def main(cfg: DictConfig) -> None:
     torch.cuda.set_device(int(os.environ['SLURM_LOCALID']))
+    work = os.environ['WORK']
     dev = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     # print(OmegaConf.to_yaml(cfg))
     by_complex = cfg.experiment.by_complex
@@ -89,15 +92,58 @@ def main(cfg: DictConfig) -> None:
     model = load_model(cfg, dev)
 
     # test dataset
-    test_ds = Complexes_4DDataset(cfg.io, cfg.data_setup, by_complex, mode="test", debug=cfg.debug)
+    if cfg.network.sim_test:
+        test_ds = Complexes_4DDataset(cfg.io, cfg.data_setup, by_complex=False, mode="test", debug=cfg.debug) #test on all simulations of test set
+    else:
+        test_ds = Complexes_4DDataset(cfg.io, cfg.data_setup, by_complex=True, mode="test", debug=cfg.debug)
+
     test_dl = DataLoader(test_ds, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True,
                          persistent_workers=True)
 
     # apply model on test
     affinities, predictions = predict(model, test_dl, len(test_ds), dev)
+    if cfg.network.mean_test:
+        pdbs = [pdb.split('/')[11] for pdb in test_ds.samples_list]
+        assert len(affinities) == len(pdbs)
+        Daffinities = {}
+        Dpredictions = {}
+        for i,pdb in enumerate(pdbs):
+            if not pdb in Daffinities:
+                Daffinities[pdb] = affinities[i]
+                Dpredictions[pdb] = [predictions[i]]
+            else:
+                Dpredictions[pdb].append(predictions[i])
 
-    # compute metrics
-    analyse(affinities, predictions)
+        mean_affinities = np.array([np.mean(Laffinities) for Laffinities in Daffinities.values()])
+        mean_predictions = np.array([np.mean(Lpredictions) for Lpredictions in Dpredictions.values()])
+        DFresults= pd.DataFrame([Daffinities,Dpredictions]).T
+        DFresults.columns= ['real','predictions']
+        DFmean = DFresults.applymap(np.mean)
+        DFmean = DFmean.round(2)
+        DFresults['mean_pred'] = DFmean['predictions']
+        DFresults.to_csv(f'{work}/deep_learning/MD_ConvLSTM/cnn_fcn_lstm/correlation_plot/CNN-LSTM_mean_{cfg.experiment.run}.csv')
+        # compute metrics
+        rmse, mae, corr = analyse(mean_affinities, mean_predictions)
+    else:
+        rmse, mae, corr = analyse(affinities, predictions)
+
+    Lrun_name = cfg.experiment.run.replace('-',' ').split('_')
+    if cfg.network.mean_test:
+        grid = sns.jointplot(x=mean_affinities, y=mean_predictions, space=0.0, height=3, s=10, edgecolor='w', ylim=(0, 16), xlim=(0, 16),alpha=.5)
+    else:
+        grid = sns.jointplot(x=affinities, y=predictions, space=0.0, height=3, s=10, edgecolor='w', ylim=(0, 16), xlim=(0, 16),alpha=.5)
+    grid.ax_joint.text(0.5, 11, f'cnn-lstm {Lrun_name[2]}\nR= {corr[0]:.2f} - RMSE= {rmse:.2f}\n{Lrun_name[0]}\n{Lrun_name[1]}',size=8)
+    grid.set_axis_labels('real','predicted',size=8)
+    grid.ax_joint.set_xticks(range(0, 16, 5))
+    grid.ax_joint.set_yticks(range(0, 16, 5))
+    grid.ax_joint.xaxis.set_label_coords(0.5,-0.13)
+    grid.ax_joint.yaxis.set_label_coords(-0.15,0.5)
+    if cfg.network.mean_test:
+        grid.fig.savefig(f'{work}/deep_learning/MD_ConvLSTM/cnn_fcn_lstm/correlation_plot/CNN-LSTM_mean_{cfg.experiment.run}.pdf')
+    elif cfg.network.sim_test:
+        grid.fig.savefig(f'{work}/deep_learning/MD_ConvLSTM/cnn_fcn_lstm/correlation_plot/CNN-LSTM_all_{cfg.experiment.run}.pdf')
+    else:
+        grid.fig.savefig(f'{work}/deep_learning/MD_ConvLSTM/cnn_fcn_lstm/correlation_plot/CNN-LSTM_random_{cfg.experiment.run}.pdf')
 
 
 if __name__ == "__main__":

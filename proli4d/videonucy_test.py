@@ -1,6 +1,7 @@
 import os
 import time
-
+import seaborn as sns
+import pandas as pd
 import hydra
 import numpy as np
 import scipy
@@ -8,9 +9,10 @@ import scipy.stats
 import torch
 from omegaconf import DictConfig, OmegaConf
 from torch.utils.data import DataLoader
+from torch import device, cuda
 
 from codes.complex_dataset import Complexes_4DDataset
-from codes.videonucy import Videonucy
+from codes.videonucy import create_videonucy
 
 def predict(model, dataloader, no_of_samples, device):
     model.eval()
@@ -45,28 +47,75 @@ def analyse(affinities, predictions):
     return rmse, mae, corr
 
 
-@hydra.main(config_path="./configs", config_name="videonucy")
+@hydra.main(config_path="./configs", config_name=f"videonucy_v4")
 def main(cfg: DictConfig) -> None:
     # print(OmegaConf.to_yaml(cfg))
-    by_complex = cfg.experiment.by_complex
     batch_size = cfg.training.batch_size
+    work = os.environ['WORK']
     # load model
+    dev = device("cuda" if cuda.is_available() else "cpu")
     model_path = os.path.join(cfg.experiment.model_path, f"{cfg.experiment.run}.pth")
-    model = torch.load(model_path)
-
-    dev = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    checkpoint = torch.load(model_path, map_location=dev)
+    model = create_videonucy(cfg.network.convlstm_cfg, cfg.network.fc_cfg)
+    model.load_state_dict(checkpoint['model'])
     model.to(dev)
 
     print(f"Model {model_path} loaded")
     # test dataset
-    test_ds = Complexes_4DDataset(cfg.io, cfg.data_setup, by_complex, mode="test", debug=cfg.debug)
+    if cfg.network.sim_test:
+        test_ds = Complexes_4DDataset(cfg.io, cfg.data_setup, by_complex=False, mode="test", debug=cfg.debug) #test on all simulation from test set
+    else:
+        test_ds = Complexes_4DDataset(cfg.io, cfg.data_setup, by_complex=True, mode="test", debug=cfg.debug)
+
     test_dl = DataLoader(test_ds, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True, persistent_workers=True)
 
     # apply model on test
     affinities, predictions = predict(model, test_dl, len(test_ds), dev)
 
     # compute metrics
-    analyse(affinities, predictions)
+    if cfg.network.mean_test:
+        pdbs = [pdb.split('/')[11] for pdb in test_ds.samples_list]
+        assert len(affinities) == len(pdbs)
+        Daffinities = {}
+        Dpredictions = {}
+        for i,pdb in enumerate(pdbs):
+            if not pdb in Daffinities:
+                Daffinities[pdb] = affinities[i]
+                Dpredictions[pdb] = [predictions[i]]
+            else:
+                Dpredictions[pdb].append(predictions[i])
+
+        mean_affinities = np.array([np.mean(Laffinities) for Laffinities in Daffinities.values()])
+        mean_predictions = np.array([np.mean(Lpredictions) for Lpredictions in Dpredictions.values()])
+        DFresults = pd.DataFrame([Daffinities,Dpredictions]).T
+        DFresults.columns = ['real','predictions']
+        DFmean = DFresults.applymap(np.mean)
+        DFmean = DFmean.round(2)
+        DFresults['mean_pred'] = DFmean['predictions']
+        DFresults.to_csv(f'{work}/deep_learning/MD_ConvLSTM/proli4d/correlation_plot/ConvLSTM_mean_{cfg.experiment.run}.csv')
+
+        # compute metrics
+        rmse, mae, corr = analyse(mean_affinities, mean_predictions)
+    else:
+        rmse, mae, corr = analyse(affinities, predictions)
+
+    Lrun_name = cfg.experiment.run.replace('-',' ').split('_')
+    if cfg.network.mean_test:
+        grid = sns.jointplot(x=mean_affinities, y=mean_predictions, space=0.0, height=3, s=10, edgecolor='w', ylim=(0, 16), xlim=(0, 16), alpha=.5)
+    else:
+        grid = sns.jointplot(x=affinities, y=predictions, space=0.0, height=3, s=10, edgecolor='w', ylim=(0, 16), xlim=(0, 16), alpha=.5)
+    grid.ax_joint.text(0.5, 11, f'convlstm {Lrun_name[2]}\nR= {corr[0]:.2f} - RMSE= {rmse:.2f}\n{Lrun_name[0]}\n{Lrun_name[1]}', size=8)
+    grid.set_axis_labels('real','predicted', size=8)
+    grid.ax_joint.set_xticks(range(0, 16, 5))
+    grid.ax_joint.set_yticks(range(0, 16, 5))
+    grid.ax_joint.xaxis.set_label_coords(0.5, -0.13)
+    grid.ax_joint.yaxis.set_label_coords(-0.15, 0.5)
+    if cfg.network.mean_test:
+        grid.fig.savefig(f'{work}/deep_learning/MD_ConvLSTM/proli4d/correlation_plot/ConvLSTM_mean_{cfg.experiment.run}.pdf')
+    elif cfg.network.sim_test:
+        grid.fig.savefig(f'{work}/deep_learning/MD_ConvLSTM/proli4d/correlation_plot/ConvLSTM_all_{cfg.experiment.run}.pdf')
+    else:
+        grid.fig.savefig(f'{work}/deep_learning/MD_ConvLSTM/proli4d/correlation_plot/ConvLSTM_random_{cfg.experiment.run}.pdf')
 
 
 if __name__ == "__main__":

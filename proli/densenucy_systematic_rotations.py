@@ -1,123 +1,114 @@
-### IMPORT LIBRARIES
-##### BUILT_IN
-import time
-import os
 import copy
-import mlflow
+import os
+import time
 import seaborn as sns
+
 import pandas as pd
-##### EXTERNAL
 import hydra
-from omegaconf import DictConfig, OmegaConf
+import mlflow
 import torch
 import torch.optim as optim
+from omegaconf import DictConfig, OmegaConf
 from torch import nn
 from torch.utils.data import DataLoader
 from torchinfo import summary
-##### LOCAL
-from codes.pafnucy import create_pafnucy
+
+from codes.densenucy import create_densenucy
 from codes.pt_data import ProteinLigand_3DDataset
 from codes.raw_data import RawDataset
-from codes.tools import convert_byte, convert_time, master_print
 from codes.transformations import build_rotations
 from proli_test import analyse, predict
 
 
-### UTILS
-def save_model(model, pathname, experiment_name, run_name, rmse, epoch, cfg):
-    filename = os.path.join(pathname, f"{experiment_name}_{run_name}_{rmse:.4f}.pth")
-    print(f"\tsaving model {filename}")
-    model_without_ddp = model.module
-    checkpoint = {
-       'model': model_without_ddp.state_dict(),
-       'epoch': epoch,
-       'cfg': cfg}
-
-    torch.save(checkpoint, filename)
+def convert_time(seconds):
+    return time.strftime("%H:%M:%S", time.gmtime(seconds))
 
 
-### TRAIN
-def train(model, train_dataloader, valid_dataloader, dataset_size, cfg):
-
-    ### TRAINING SETUP
-    dataloaders = {'train': train_dataloader, 'val': valid_dataloader}
+def train_with_rotations(model, raw_data_train, valid_dataloader, dataset_size, cfg, rotations, grid_spacing,
+                         batch_size, model_path, name):
     metric = nn.MSELoss(reduction='sum')
     criterion = nn.MSELoss(reduction='mean')
-    cfg_train, cfg_model_path, cfg_exp = cfg.training, cfg.io.model_path, cfg.experiment_name
-    optimizer = optim.Adam(model.parameters(), lr=cfg_train.learning_rate, weight_decay=cfg_train.weight_decay)
+    optimizer = optim.Adam(model.parameters(), lr=cfg.learning_rate, weight_decay=cfg.weight_decay)
+    no_of_rotations = len(rotations)
     best_model_wts = copy.deepcopy(model.state_dict())
     best_MSE, best_epoch = 100.0, -1
-    patience, max_patience = 0, cfg_train.patience
+    patien 0
+    patience, max_patience = 0, cfg.patience*no_of_rotations
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
-    ### TRAINING PHASE
     time_train = time.time()
 
-    for epoch in range(cfg_train.num_epochs):
-        print(f"Epoch {epoch + 1}/{cfg_train.num_epochs}")
-
+    for epoch in range(cfg.num_epochs):
+        print(f"Epoch {epoch + 1}/{cfg.num_epochs}")
         time_epoch = time.time()
 
-        for phase in ['train', 'val']:
-            if phase == 'train':
-                model.train()
-            else:
-                model.eval()
-
-            running_metrics = 0.0
-
-            for (inputs, labels) in dataloaders[phase]:
-                inputs, labels = inputs.to(device), labels.to(device)
-
-                optimizer.zero_grad()
-
-                with torch.set_grad_enabled(phase == 'train'):
-                    outputs = model(inputs)
-                    loss = criterion(outputs, labels)
-
-                    # statistics
-                    running_metrics += metric(outputs, labels).cpu().item()
-
+        for rot in range(no_of_rotations):
+            # print(f"\tRotation {rot} / {no_of_rotations}")
+            # recreate train_dataloader with one rotation
+            train_dataset = ProteinLigand_3DDataset(raw_data_train,
+                                                    grid_spacing=grid_spacing,
+                                                    rotations=[rotations[rot]])  # only one rotation
+            train_dataloader = DataLoader(train_dataset, batch_size=batch_size,
+                                          shuffle=True, num_workers=4, pin_memory=True, persistent_workers=True)
+            dataloaders = {'train': train_dataloader, 'val': valid_dataloader}
+            for phase in ['train', 'val']:
                 if phase == 'train':
-                    loss.backward()
-                    optimizer.step()
-
-            epoch_metric = running_metrics / dataset_size[phase]
-            if phase == 'train':
-                print(f"\t[{phase}] MSELoss {epoch_metric:.4f}")
-            else:
-                print(f"\t[{phase}] MSELoss {epoch_metric:.4f} \t Duration: {time.time() - time_epoch:.2f}")
-
-            # check if the model is improving
-            if phase == 'val':
-                if epoch_metric < best_MSE:
-                    print(f"/\\ Better loss {best_MSE} --> {epoch_metric}")
-                    best_MSE, best_epoch = epoch_metric, epoch
-                    best_model_wts = copy.deepcopy(model.state_dict())
-                    print(f"\tsaving model {cfg_exp}")
-                    save_model(model, cfg_model_path, cfg_exp, best_epoch, best_MSE, best_epoch, cfg)
-
-                    patience = 0
+                    model.train()
                 else:
-                    patience += 1
+                    model.eval()
 
-            mlflow.log_metric(f"{phase}_MSELoss", epoch_metric, epoch)
+                running_metrics = 0.0
+                for (inputs, labels) in dataloaders[phase]:
+                    inputs, labels = inputs.to(device), labels.to(device)
+
+                    optimizer.zero_grad()
+
+                    with torch.set_grad_enabled(phase == 'train'):
+                        outputs = model(inputs)
+                        loss = criterion(outputs, labels)
+                        # statistics
+                        running_metrics += metric(outputs, labels).cpu().item()
+
+                    if phase == 'train':
+                        loss.backward()
+                        optimizer.step()
+
+                epoch_metric = running_metrics / dataset_size[phase]
+                if phase == 'train':
+                    print(f"\t[{phase} - {rot}/{no_of_rotations}] MSELoss {epoch_metric:.4f}")
+                else:
+                    if rot == no_of_rotations - 1:
+                        print(f"\t[{phase} - {rot}/{no_of_rotations}] MSELoss {epoch_metric:.4f} \
+                                \t Duration: {time.time() - time_epoch:.2f}")
+
+                if phase == 'val'
+                    if rot == no_of_rotations - 1: # deep copy the model only at the end of the rotations
+                        if epoch_metric < best_MSE:
+                            print(f"/\\ Better loss {best_MSE} --> {epoch_metric} at the end of an epoch * 24 rotations")
+                            best_MSE, best_epoch = epoch_metric, epoch
+                            best_model_wts = copy.deepcopy(model.state_dict())
+                            torch.save(model, os.path.join(model_path, f"{name}_{best_MSE:.4f}_{best_epoch}.pth"))
+                            patience = 0
+                        else:
+                            patience += 1
+
+                mlflow.log_metric(f"{phase}_MSELoss", epoch_metric, epoch)
 
         if patience > max_patience:
             print("----------- Early stopping activated !")
             break
 
     duration = time.time() - time_train
-    master_print("\n\n_____________________________________________")
-    master_print(f"[{epoch + 1} / {cfg_train.num_epochs}] Best mean MSE: {best_MSE:.4f} at epoch {best_epoch} \
+
+    print(f"[{epoch + 1} / {cfg.num_epochs}] Best mean MSE: {best_MSE:.4f} at {best_epoch} epoch.\
             \n\tTotal duration: {convert_time(duration)}")
-    master_print("_____________________________________________")
 
     model.load_state_dict(best_model_wts)
 
     return model, best_epoch, best_MSE
+
 
 def test(model, test_dataloader, test_samples):
     metric = nn.MSELoss(reduction='sum')
@@ -137,16 +128,20 @@ def test(model, test_dataloader, test_samples):
     print(f"\t[Test] MSELoss {metric:.4f}")
     mlflow.log_metric(f"test_MSELoss", metric)
 
-@hydra.main(config_path="./configs", config_name="default")
-def main(cfg: DictConfig) -> None:
+def save_model(model, pathname, experiment_name, run_name, rmse):
+    filename = os.path.join(pathname, f"{experiment_name}_{run_name}_{rmse:.4f}.pth")
+    print(f"\tsaving model {filename}")
+    torch.save(model, filename)
+
+@hydra.main(config_path="./configs", config_name="dense_rotations")
+def my_app(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
     work = os.environ['WORK']
-    
+
     # load hdf data in memory
     raw_data_train = RawDataset(cfg.io.input_dir, 'training', cfg.data.max_dist)
     raw_data_train.load_data()
     print(raw_data_train)
-    batch_size = cfg.training.batch_size
 
     if not cfg.training.only_test:
         raw_data_valid = RawDataset(cfg.io.input_dir, 'validation', cfg.data.max_dist)
@@ -164,27 +159,26 @@ def main(cfg: DictConfig) -> None:
 
         # create dataset (pt) and dataloader
         train_dataset = ProteinLigand_3DDataset(raw_data_train,
-                                            grid_spacing=cfg.data.grid_spacing, rotations=rotations_matrices)
+                                            grid_spacing=cfg.data.grid_spacing,
+                                            rotations=None)  # done manually during training
         valid_dataset = ProteinLigand_3DDataset(raw_data_valid,
-                                            grid_spacing=cfg.data.grid_spacing, rotations=None)
+                                            grid_spacing=cfg.data.grid_spacing, 
+                                             rotations=None)
 
         dataset_size = {'train': len(train_dataset), 'val': len(valid_dataset)}
 
-        train_dataloader = DataLoader(train_dataset, batch_size=batch_size,
-                                  shuffle=True, num_workers=4, pin_memory=True, persistent_workers=True)
+        batch_size = cfg.training.batch_size
+        #train_dataloader = DataLoader(train_dataset, batch_size=batch_size,
+        #                              shuffle=True, num_workers=4, pin_memory=True, persistent_workers=True)
         valid_dataloader = DataLoader(valid_dataset, batch_size=batch_size,
                                   shuffle=False, num_workers=4, pin_memory=True, persistent_workers=True)
 
     # create model
-
-    model = create_pafnucy(
-            conv_cfg=cfg.network.conv_channels,
-            conv_kernel_size=cfg.network.conv_kernel_size,
-            pool_kernel_size=cfg.network.pool_kernel_size,
-            fc_cfg=cfg.network.dense_sizes,
-            dropout_prob=cfg.network.drop_p
-        )
-
+    model = create_densenucy(
+        cfg.network.growth_rate,
+        cfg.network.dense_cfg,
+        cfg.network.fc_cfg
+    )
     if cfg.network.pretrained_path:
         checkpoint = torch.load(f"{cfg.network.pretrained_path.strip('.pth')}.pth")
         model.load_state_dict(checkpoint['model'])
@@ -204,11 +198,9 @@ def main(cfg: DictConfig) -> None:
         mlflow.log_param("batch_size", cfg.training.batch_size)
         mlflow.log_param("learning_rate", cfg.training.learning_rate)
         mlflow.log_param("weight_decay", cfg.training.weight_decay)
-        mlflow.log_param("conv_cfg", cfg.network.conv_channels)
-        mlflow.log_param("conv_kernel_size", cfg.network.conv_kernel_size)
-        mlflow.log_param("pool_kernel_size", cfg.network.pool_kernel_size)
-        mlflow.log_param("fc_cfg", cfg.network.dense_sizes)
-        mlflow.log_param("dropout", cfg.network.drop_p)
+        mlflow.log_param("growth_rate", cfg.network.growth_rate)
+        mlflow.log_param("dense_cfg", cfg.network.dense_cfg)
+        mlflow.log_param("fc_cfg", cfg.network.fc_cfg)
         mlflow.log_param("patience", cfg.training.patience)
         mlflow.log_param("max_epoch", cfg.training.num_epochs)
 
@@ -216,7 +208,10 @@ def main(cfg: DictConfig) -> None:
         if cfg.training.only_test:
             best_model = model
         else:
-            best_model, best_epoch, best_MSE = train(model, train_dataloader, valid_dataloader, dataset_size, cfg)
+            best_model, best_epoch, best_MSE = train_with_rotations(model, raw_data_train, valid_dataloader, dataset_size,
+                                                      cfg.training, rotations_matrices,
+                                                      cfg.data.grid_spacing, cfg.training.batch_size,
+                                                      cfg.io.model_path, cfg.experiment_name)
             mlflow.log_param("best_epoch", best_epoch)
             mlflow.log_metric("best_val_MSELoss", best_MSE)
 
@@ -232,22 +227,19 @@ def main(cfg: DictConfig) -> None:
 
         test_dataset = ProteinLigand_3DDataset(raw_data_test,
                                                grid_spacing=cfg.data.grid_spacing, rotations=None)
-        print(test_dataset)
 
         test_dataloader = DataLoader(test_dataset, batch_size=batch_size * 4,
                                      shuffle=False, num_workers=4, pin_memory=True, persistent_workers=True)
-        print(f"--------------------- Running test")
-        test(best_model, test_dataloader, len(test_dataset))
-        print(f"--------------------- Running predict")
-        affinities, predictions = predict(best_model, test_dataloader, len(test_dataset))
 
-        pdbs = [pdb for pdb in raw_data_test.ids]
+        test(best_model, test_dataloader, len(test_dataset))
+
+        affinities, predictions = predict(best_model, test_dataloader, len(test_dataset))
+        pdbs = [pdb.split('/')[11] for pdb in test_dataset.samples_list]
         DFresults = pd.DataFrame([pdbs,affinities,predictions])
         DFresults.columns = ['pdbid','real','prediction']
-        DFresults.to_csv(f'{work}/deep_learning/MD_ConvLSTM/proli/correlation_plot/Proli_{cfg.mlflow.run_name}.csv')
+        DFresults.to_csv(f'{work}/deep_learning/MD_ConvLSTM/proli/correlation_plot/Densenucy_systematic-rotations_{cfg.mlflow.run_name}.csv')
 
         rmse, mae, corr = analyse(affinities, predictions)
-
         mlflow.log_metric(f"test_rmse", rmse)
         mlflow.log_metric(f"test_mae", mae)
         mlflow.log_metric(f"test_r", corr[0])
@@ -256,26 +248,22 @@ def main(cfg: DictConfig) -> None:
         print(f"[TEST] rmse: {rmse:.4f} mae: {mae:.4f} corr: {corr}")
 
         mlflow.pytorch.log_model(best_model, "model")
-
         if not cfg.training.only_test:
-            save_model(best_model, cfg.io.model_path, cfg.experiment_name, cfg.mlflow.run_name, rmse, best_epoch, cfg)
+            save_model(model, cfg.io.model_path, cfg.experiment_name, cfg.mlflow.run_name, rmse)
 
         Lrun_name = cfg.mlflow.run_name.replace('-',' ').split('_')
         grid = sns.jointplot(x=affinities, y=predictions, space=0.0, height=3, s=10, edgecolor='w', ylim=(0, 16), xlim=(0, 16), alpha=.5)
         if 'complexes-with-MD' in cfg.mlflow.run_name:
-            grid.ax_joint.text(0.5, 11, f'proli - R= {corr[0]:.2f} - RMSE= {rmse:.2f}\n{Lrun_name[0]}\n{Lrun_name[1]}\n{Lrun_name[2]}\n{Lrun_name[3]}', size=7)
+            grid.ax_joint.text(0.5, 11, f'Densenucy systematic rotations - R= {corr[0]:.2f} - RMSE= {rmse:.2f}\n{Lrun_name[0]}\n{Lrun_name[1]}\n{Lrun_name[2]}\n{Lrun_name[3]}', size=7)
         else:
-            grid.ax_joint.text(0.5, 11, f'proli - R= {corr[0]:.2f} - RMSE= {rmse:.2f}\n{Lrun_name[0]}\n{Lrun_name[1]}\n{Lrun_name[2]}', size=7)
+            grid.ax_joint.text(0.5, 11, f'Densenucy systematic rotations - R= {corr[0]:.2f} - RMSE= {rmse:.2f}\n{Lrun_name[0]}\n{Lrun_name[1]}\n{Lrun_name[2]}', size=7)
         grid.set_axis_labels('real','predicted', size=7)
         grid.ax_joint.set_xticks(range(0, 16, 5))
         grid.ax_joint.set_yticks(range(0, 16, 5))
         grid.ax_joint.xaxis.set_label_coords(0.5, -0.13)
         grid.ax_joint.yaxis.set_label_coords(-0.15, 0.5)
-        grid.fig.savefig(f'{work}/deep_learning/MD_ConvLSTM/proli/correlation_plot/Proli_{cfg.mlflow.run_name}.pdf')
-
-    gpu_memory = torch.cuda.max_memory_allocated()
-    print(f"--\nGPU usage on GPU {DIST.local_rank}: {convert_byte(gpu_memory)}\n--")
+        grid.fig.savefig(f'{work}/deep_learning/MD_ConvLSTM/proli/correlation_plot/Densenucy_systematic-rotations_{cfg.mlflow.run_name}.pdf')
 
 
 if __name__ == "__main__":
-    main()
+    my_app()

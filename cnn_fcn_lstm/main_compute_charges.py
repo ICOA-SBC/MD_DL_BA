@@ -44,7 +44,7 @@ def get_charges_per_simulation(sim):
     return charges
 
 
-@hydra.main(config_path="./configs", config_name="default_datasetv3")
+@hydra.main(config_path="./configs", config_name="default_datasetv4")
 def main(cfg: DictConfig) -> None:
     """
     Compute charge mean and std over the whole train dataset (63Go)

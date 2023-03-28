@@ -1,12 +1,19 @@
+hydra: #prevent hydra log from filing home
+  run:
+    dir: ${oc.env:luh_CCFRWORK}/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+
 mlflow:
-  path: ${oc.env:SCRATCH}/proli/mlruns
-  run_name: pafnucy
+  # path to store mlflow experience
+  path: ${oc.env:luh_CCFRSCRATCH}/mlruns
+  # name of the mlflow experience
+  run_name: proli
     
 io:
   # path to train, val and test dataset as h5py files
-  input_dir: ${oc.env:dzc_ALL_CCFRWORK}/deep_learning/pafnucy/data/CoG_12
+  input_dir: ${oc.env:luh_ALL_CCFRWORK}/deep_learning/pafnucy/data/CoG_12
   # path where are saved the trained model
-  model_path: ${oc.env:SCRATCH}/proli/models
+  model_path: ${oc.env:luh_CCFRSCRATCH}/models/proli
+  specific_test_dir: ${oc.env:luh_ALL_CCFRWORK}/deep_learning/pafnucy/data/CoG_12
 
 data:
   # distance between grid points in angstrom
@@ -18,8 +25,9 @@ training:
   learning_rate: 1e-5 # learning rate
   weight_decay: 0.0001 # lambda for weight decay
   batch_size: 20 # batch size
-  num_epochs: 800 # max number of epochs
-  patience: 80 # early stopping
+  num_epochs: 1 # max number of epochs 200
+  patience: 10 # early stopping
+  only_test:
   
 network:
   conv_channels: [ 19, 64, 128, 256 ] # number of filters in conv layers
@@ -27,8 +35,6 @@ network:
   pool_kernel_size: 2 # patch size for pooling layers
   dense_sizes: [ 16384, 1000, 500, 200 ] # number of neurons in dense layers
   drop_p: 0.5 # probability for dropout
+  pretrained_path:
 
-
-experiment_name: test
-
-
+experiment_name: proli

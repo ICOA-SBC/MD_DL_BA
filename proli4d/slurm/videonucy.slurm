@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=videonucy_training
-#SBATCH --account=sos@v100
+#SBATCH --account=luh@v100
 #SBATCH --qos=qos_gpu-t3
 #SBATCH --output=logs/%x.out
 #SBATCH --error=logs/%x.err
@@ -14,7 +14,7 @@
 
 module purge
 module load pytorch-gpu/py3/1.11.0
-export PYTHONUSERBASE=$dzc_CCFRWORK/.local_convlstm
+export PYTHONUSERBASE=$WORK/.local_convlstm
 export PATH=$PYTHONUSERBASE/bin:$PATH
 
 # avoids warning from mlflow

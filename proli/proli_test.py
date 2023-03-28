@@ -4,7 +4,7 @@ import time
 import hydra
 import numpy as np
 import scipy
-from scipy import stats
+import scipy.stats
 import torch
 from omegaconf import DictConfig, OmegaConf
 from torch.utils.data import DataLoader
@@ -53,7 +53,6 @@ def analyse(affinities, predictions):
         corr= {corr}
     """)
     return rmse, mae, corr
-
 
 @hydra.main(config_path="./configs", config_name="default_test")
 def my_app(cfg: DictConfig) -> None:
