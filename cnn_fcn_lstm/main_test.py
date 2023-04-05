@@ -52,7 +52,6 @@ def predict(model, dataloader, no_of_samples, device):
     model.eval()
     affinities = np.empty(0, dtype=np.float32)
     predictions = []
-
     for (inputs, labels) in dataloader:
         inputs = inputs.to(device)
         with torch.set_grad_enabled(False):
@@ -102,36 +101,24 @@ def main(cfg: DictConfig) -> None:
 
     # apply model on test
     affinities, predictions = predict(model, test_dl, len(test_ds), dev)
+    
+    # compute metrics
+    rmse, mae, corr = analyse(affinities, predictions)
+    print(affinities)
+    print(predictions)
     if cfg.network.mean_test:
         pdbs = [pdb.split('/')[11] for pdb in test_ds.samples_list]
         assert len(affinities) == len(pdbs)
-        Daffinities = {}
-        Dpredictions = {}
-        for i,pdb in enumerate(pdbs):
-            if not pdb in Daffinities:
-                Daffinities[pdb] = affinities[i]
-                Dpredictions[pdb] = [predictions[i]]
-            else:
-                Dpredictions[pdb].append(predictions[i])
-
-        mean_affinities = np.array([np.mean(Laffinities) for Laffinities in Daffinities.values()])
-        mean_predictions = np.array([np.mean(Lpredictions) for Lpredictions in Dpredictions.values()])
-        DFresults= pd.DataFrame([Daffinities,Dpredictions]).T
-        DFresults.columns= ['real','predictions']
-        DFmean = DFresults.applymap(np.mean)
-        DFmean = DFmean.round(2)
-        DFresults['mean_pred'] = DFmean['predictions']
+        DFresults = pd.DataFrame([pdbs,affinities,predictions]).T
+        DFresults.columns = ['pdbid','real','predictions']
+        DFgroupby = DFresults.groupby('pdbid')
+        DFresults = pd.concat([DFgroupby['real'].first(), DFgroupby['predictions'].apply(list), DFgroupby['predictions'].mean().round(2).rename('mean_pred')], axis=1)
         DFresults.to_csv(f'{work}/deep_learning/MD_ConvLSTM/cnn_fcn_lstm/correlation_plot/CNN-LSTM_mean_{cfg.experiment.run}.csv')
-        # compute metrics
-        rmse, mae, corr = analyse(mean_affinities, mean_predictions)
-    else:
-        rmse, mae, corr = analyse(affinities, predictions)
-
+        affinities = DFresults.real
+        predictions = DFresults.mean_pred
+        print(pdbs)
     Lrun_name = cfg.experiment.run.replace('-',' ').split('_')
-    if cfg.network.mean_test:
-        grid = sns.jointplot(x=mean_affinities, y=mean_predictions, space=0.0, height=3, s=10, edgecolor='w', ylim=(0, 16), xlim=(0, 16),alpha=.5)
-    else:
-        grid = sns.jointplot(x=affinities, y=predictions, space=0.0, height=3, s=10, edgecolor='w', ylim=(0, 16), xlim=(0, 16),alpha=.5)
+    grid = sns.jointplot(x=affinities, y=predictions, space=0.0, height=3, s=10, edgecolor='w', ylim=(0, 16), xlim=(0, 16),alpha=.5)
     grid.ax_joint.text(0.5, 11, f'cnn-lstm {Lrun_name[2]}\nR= {corr[0]:.2f} - RMSE= {rmse:.2f}\n{Lrun_name[0]}\n{Lrun_name[1]}',size=8)
     grid.set_axis_labels('real','predicted',size=8)
     grid.ax_joint.set_xticks(range(0, 16, 5))
