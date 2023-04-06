@@ -58,16 +58,11 @@ def load_model(cfg, dev):
     model.to(dev)
     return model
 
-def save_model(model, pathname, experiment_name, run_name, rmse, epoch, cfg):
+def save_model(model, pathname, experiment_name, run_name, rmse):
     filename = os.path.join(pathname, f"{experiment_name}_{run_name}_{rmse:.4f}.pth")
     master_print(f"\tsaving model {filename} on rank {DIST.rank}")
-    model_without_ddp = model.module
-    checkpoint = {
-       'model': model_without_ddp.state_dict(),
-       'epoch': epoch,
-       'cfg': cfg}
 
-    torch.save(checkpoint, filename)
+    torch.save(model, filename)
 
 ### TRAIN
 def train(model, dataloaders, dataset_size, cfg, device):
@@ -135,7 +130,7 @@ def train(model, dataloaders, dataset_size, cfg, device):
                     best_MSE, best_epoch = epoch_metric, epoch
                     best_model_wts = copy.deepcopy(model.state_dict())
                     if DIST.master_rank:
-                        save_model(model, cfg_model_path, cfg_exp, best_epoch, best_MSE, best_epoch, cfg)
+                        save_model(model, cfg_model_path, cfg_exp, best_epoch, best_MSE)
                     patience = 0
                 else:
                     patience += 1
@@ -314,7 +309,7 @@ def main(cfg: DictConfig) -> None:
             mlflow.pytorch.log_model(best_model, "model")
 
             if not cfg.training.only_test:
-                save_model(best_model, cfg.io.model_path, cfg.experiment_name, cfg.mlflow.run_name, rmse, best_epoch, cfg)
+                save_model(best_model, cfg.io.model_path, cfg.experiment_name, cfg.mlflow.run_name, rmse)
 
             Lrun_name = cfg.mlflow.run_name.replace('-',' ').split('_')
             grid = sns.jointplot(x=affinities, y=predictions, space=0.0, height=3, s=10, edgecolor='w', ylim=(0, 16), xlim=(0, 16), alpha=.5)

@@ -27,13 +27,8 @@ from proli_test import analyse, predict
 def save_model(model, pathname, experiment_name, run_name, rmse, epoch, cfg):
     filename = os.path.join(pathname, f"{experiment_name}_{run_name}_{rmse:.4f}.pth")
     print(f"\tsaving model {filename}")
-    model_without_ddp = model.module
-    checkpoint = {
-       'model': model_without_ddp.state_dict(),
-       'epoch': epoch,
-       'cfg': cfg}
 
-    torch.save(checkpoint, filename)
+    torch.save(model, filename)
 
 
 ### TRAIN
