@@ -47,7 +47,7 @@ def analyse(affinities, predictions):
     return rmse, mae, corr
 
 
-@hydra.main(config_path="./configs", config_name=f"videonucy_v4")
+@hydra.main(config_path="./configs", config_name=f"videonucy_v6")
 def main(cfg: DictConfig) -> None:
     # print(OmegaConf.to_yaml(cfg))
     batch_size = cfg.training.batch_size

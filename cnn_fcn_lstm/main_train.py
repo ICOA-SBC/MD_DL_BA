@@ -208,7 +208,7 @@ def mlflow_setup(cfg):
         mlflow.log_artifact("configuration.yaml")
 
 
-@hydra.main(config_path="./configs", config_name=f"default_datasetv4")
+@hydra.main(config_path="./configs", config_name=f"cnnlstm_v6")
 def main(cfg: DictConfig) -> None:
     dev = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     torch.cuda.set_device(DIST.local_rank)

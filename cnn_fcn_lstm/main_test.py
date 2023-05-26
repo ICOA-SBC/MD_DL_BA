@@ -79,7 +79,7 @@ def analyse(affinities, predictions):
     return rmse, mae, corr
 
 
-@hydra.main(config_path="./configs", config_name=f"default_datasetv4")
+@hydra.main(config_path="./configs", config_name=f"cnnlstm_v6")
 def main(cfg: DictConfig) -> None:
     torch.cuda.set_device(int(os.environ['SLURM_LOCALID']))
     work = os.environ['WORK']

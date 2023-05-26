@@ -237,7 +237,7 @@ def main(cfg: DictConfig) -> None:
         affinities, predictions = predict(best_model, test_dataloader, len(test_dataset))
 
         pdbs = [pdb for pdb in raw_data_test.ids]
-        DFresults = pd.DataFrame([pdbs,affinities,predictions])
+        DFresults = pd.DataFrame([pdbs,affinities,predictions]).T
         DFresults.columns = ['pdbid','real','prediction']
         DFresults.to_csv(f'{work}/deep_learning/MD_ConvLSTM/proli/correlation_plot/Proli_{cfg.mlflow.run_name}.csv')
 
@@ -257,10 +257,14 @@ def main(cfg: DictConfig) -> None:
 
         Lrun_name = cfg.mlflow.run_name.replace('-',' ').split('_')
         grid = sns.jointplot(x=affinities, y=predictions, space=0.0, height=3, s=10, edgecolor='w', ylim=(0, 16), xlim=(0, 16), alpha=.5)
-        if 'complexes-with-MD' in cfg.mlflow.run_name:
+        if len(Lrun_name) == 4:
             grid.ax_joint.text(0.5, 11, f'proli - R= {corr[0]:.2f} - RMSE= {rmse:.2f}\n{Lrun_name[0]}\n{Lrun_name[1]}\n{Lrun_name[2]}\n{Lrun_name[3]}', size=7)
-        else:
+        elif len(Lrun_name) == 3:
             grid.ax_joint.text(0.5, 11, f'proli - R= {corr[0]:.2f} - RMSE= {rmse:.2f}\n{Lrun_name[0]}\n{Lrun_name[1]}\n{Lrun_name[2]}', size=7)
+        elif len(Lrun_name) == 2:
+            grid.ax_joint.text(0.5, 11, f'proli - R= {corr[0]:.2f} - RMSE= {rmse:.2f}\n{Lrun_name[0]}\n{Lrun_name[1]}', size=7)
+        elif len(Lrun_name) == 1:
+            grid.ax_joint.text(0.5, 11, f'proli - R= {corr[0]:.2f} - RMSE= {rmse:.2f}\n{Lrun_name[0]}', size=7)
         grid.set_axis_labels('real','predicted', size=7)
         grid.ax_joint.set_xticks(range(0, 16, 5))
         grid.ax_joint.set_yticks(range(0, 16, 5))
@@ -269,7 +273,7 @@ def main(cfg: DictConfig) -> None:
         grid.fig.savefig(f'{work}/deep_learning/MD_ConvLSTM/proli/correlation_plot/Proli_{cfg.mlflow.run_name}.pdf')
 
     gpu_memory = torch.cuda.max_memory_allocated()
-    print(f"--\nGPU usage on GPU {DIST.local_rank}: {convert_byte(gpu_memory)}\n--")
+    print(f"--\nGPU usage: {convert_byte(gpu_memory)}\n--")
 
 
 if __name__ == "__main__":
