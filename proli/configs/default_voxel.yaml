@@ -1,0 +1,42 @@
+hydra: #prevent hydra log from filing home
+  run:
+    dir: ${env:sos_CCFRSCRATCH}/_pafnucy/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S} 
+
+mlflow:
+  # path to store mlflow experience
+  path: ${env:sos_CCFRSCRATCH}/_pafnucy/mlruns
+  # name of the mlflow experience
+  run_name: proli
+    
+io:
+  # path to train, val and test dataset as h5py files
+  input_dir: ${env:dzc_ALL_CCFRWORK}/deep_learning/pafnucy/data/CoG_12
+  # path where are saved the trained model
+  model_path: ${env:sos_CCFRSCRATCH}/_pafnucy/models/proli
+  specific_test_dir: ${env:dzc_ALL_CCFRWORK}/deep_learning/pafnucy/data/CoG_12
+
+data:
+  # distance between grid points in angstrom
+  grid_spacing: 1.0
+  # max distance from complex center
+  max_dist: 12
+  # transform data into voxel
+  voxel: false
+
+training:
+  learning_rate: 1e-5 # learning rate
+  weight_decay: 0.0001 # lambda for weight decay
+  batch_size: 20 # batch size
+  num_epochs: 200 # max number of epochs 200
+  patience: 20 # early stopping
+  only_test:
+  
+network:
+  conv_channels: [ 19, 64, 128, 256 ] # number of filters in conv layers
+  conv_kernel_size: 5 # patch size for convolutional layers
+  pool_kernel_size: 2 # patch size for pooling layers
+  dense_sizes: [ 16384, 1000, 500, 200 ] # number of neurons in dense layers
+  drop_p: 0.2 # originally 0.5 # probability for dropout
+  pretrained_path:
+
+experiment_name: proli

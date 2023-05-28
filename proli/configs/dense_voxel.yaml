@@ -1,0 +1,45 @@
+hydra: #prevent hydra log from filing home
+  run:
+    dir: ${env:sos_CCFRSCRATCH}/_pafnucy/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S} 
+
+mlflow:
+  # path to store mlflow experience
+  path: ${env:sos_CCFRSCRATCH}/_pafnucy/mlruns
+  # name of the mlflow experience
+  run_name: densenucy
+    
+io:
+  # path to train, val and test dataset as h5py files
+  input_dir: ${env:dzc_ALL_CCFRWORK}/deep_learning/pafnucy/data/CoG_12
+  # path where are saved the trained model
+  model_path: ${env:sos_CCFRSCRATCH}/_pafnucy/models/proli
+  specific_test_dir: ${env:dzc_ALL_CCFRWORK}/deep_learning/pafnucy/data/CoG_12
+
+data:
+  # distance between grid points in angstrom
+  grid_spacing: 1.0
+  # max distance from complex center
+  max_dist: 12
+  # transform data into voxel
+  voxel: false
+
+training:
+  learning_rate: 1e-5 # learning rate
+  weight_decay: 0.0001 # lambda for weight decay
+  batch_size: 20 # batch size
+  num_epochs: 200 # max number of epochs
+  patience: 20 # early stopping
+  only_test:
+  
+network:
+  # number of channels added after each conv block in dense block
+  growth_rate: 96
+  # number of conv blocks in each dense block
+  dense_cfg: [2, 2]
+  # number of neurons in each fc block
+  # ! the first element depends on growth_rate, dense_cfg and input_size 
+  fc_cfg: [10240]
+  pretrained_path:
+
+experiment_name: densenucy
+debug: false

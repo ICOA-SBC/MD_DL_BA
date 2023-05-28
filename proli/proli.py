@@ -13,7 +13,7 @@ import torch
 import torch.optim as optim
 from torch import nn
 from torch.utils.data import DataLoader
-from torchinfo import summary
+#from torchinfo import summary
 ##### LOCAL
 from codes.pafnucy import create_pafnucy
 from codes.pt_data import ProteinLigand_3DDataset
@@ -132,7 +132,7 @@ def test(model, test_dataloader, test_samples):
     print(f"\t[Test] MSELoss {metric:.4f}")
     mlflow.log_metric(f"test_MSELoss", metric)
 
-@hydra.main(config_path="./configs", config_name="default")
+@hydra.main(config_path="./configs", config_name="cp_default_voxel")
 def main(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
     work = os.environ['WORK']
@@ -156,12 +156,12 @@ def main(cfg: DictConfig) -> None:
         # create transformations
         rotations_matrices = build_rotations()
         print(f"Number of available rotations: {len(rotations_matrices)}")
-
+        print(f"TMP: {cfg.data.voxel=}")
         # create dataset (pt) and dataloader
         train_dataset = ProteinLigand_3DDataset(raw_data_train,
-                                            grid_spacing=cfg.data.grid_spacing, rotations=rotations_matrices)
+                                            grid_spacing=cfg.data.grid_spacing, rotations=rotations_matrices, voxel_on=cfg.data.voxel)
         valid_dataset = ProteinLigand_3DDataset(raw_data_valid,
-                                            grid_spacing=cfg.data.grid_spacing, rotations=None)
+                                            grid_spacing=cfg.data.grid_spacing, rotations=None, voxel_on=cfg.data.voxel)
 
         dataset_size = {'train': len(train_dataset), 'val': len(valid_dataset)}
 
@@ -185,7 +185,7 @@ def main(cfg: DictConfig) -> None:
         model.load_state_dict(checkpoint['model'])
         print(f"Model successfully loaded")
 
-    summary(model, input_size=(batch_size, 19, 25, 25, 25))
+    #summary(model, input_size=(batch_size, 19, 25, 25, 25))
 
     try:
         mlflow.end_run()
@@ -226,7 +226,7 @@ def main(cfg: DictConfig) -> None:
         print(raw_data_test)
 
         test_dataset = ProteinLigand_3DDataset(raw_data_test,
-                                               grid_spacing=cfg.data.grid_spacing, rotations=None)
+                                               grid_spacing=cfg.data.grid_spacing, rotations=None, voxel_on=cfg.data.voxel)
         print(test_dataset)
 
         test_dataloader = DataLoader(test_dataset, batch_size=batch_size * 4,
@@ -236,11 +236,12 @@ def main(cfg: DictConfig) -> None:
         print(f"--------------------- Running predict")
         affinities, predictions = predict(best_model, test_dataloader, len(test_dataset))
 
+        """
         pdbs = [pdb for pdb in raw_data_test.ids]
         DFresults = pd.DataFrame([pdbs,affinities,predictions])
         DFresults.columns = ['pdbid','real','prediction']
-        DFresults.to_csv(f'{work}/deep_learning/MD_ConvLSTM/proli/correlation_plot/Proli_{cfg.mlflow.run_name}.csv')
-
+        DFresults.to_csv(f'{work}/_pafnucy/output/proli/correlation_plot/Proli_{cfg.mlflow.run_name}.csv')
+        """
         rmse, mae, corr = analyse(affinities, predictions)
 
         mlflow.log_metric(f"test_rmse", rmse)
@@ -255,6 +256,7 @@ def main(cfg: DictConfig) -> None:
         if not cfg.training.only_test:
             save_model(best_model, cfg.io.model_path, cfg.experiment_name, cfg.mlflow.run_name, rmse, best_epoch, cfg)
 
+        """
         Lrun_name = cfg.mlflow.run_name.replace('-',' ').split('_')
         grid = sns.jointplot(x=affinities, y=predictions, space=0.0, height=3, s=10, edgecolor='w', ylim=(0, 16), xlim=(0, 16), alpha=.5)
         if 'complexes-with-MD' in cfg.mlflow.run_name:
@@ -266,8 +268,8 @@ def main(cfg: DictConfig) -> None:
         grid.ax_joint.set_yticks(range(0, 16, 5))
         grid.ax_joint.xaxis.set_label_coords(0.5, -0.13)
         grid.ax_joint.yaxis.set_label_coords(-0.15, 0.5)
-        grid.fig.savefig(f'{work}/deep_learning/MD_ConvLSTM/proli/correlation_plot/Proli_{cfg.mlflow.run_name}.pdf')
-
+        grid.fig.savefig(f'{work}/_pafnucy/output/proli/correlation_plot/Proli_{cfg.mlflow.run_name}.pdf')
+        """
     gpu_memory = torch.cuda.max_memory_allocated()
     print(f"--\nGPU usage on GPU {DIST.local_rank}: {convert_byte(gpu_memory)}\n--")
 

@@ -3,10 +3,11 @@ from numpy.random import randint
 from torch.utils.data import Dataset
 
 from codes.transformations import convert_to_grid
+from codes.transform_voxel import apply_gauss_and_convert_to_grid
 
 
 class ProteinLigand_3DDataset(Dataset):
-    def __init__(self, raw_dataset, grid_spacing, rotations=None, transform=None, target_transform=None):
+    def __init__(self, raw_dataset, grid_spacing, rotations=None, transform=None, target_transform=None, voxel_on=False):
         self.max_dist = raw_dataset.max_dist
         self.grid_spacing = grid_spacing
         self.coords = raw_dataset.coords
@@ -18,6 +19,7 @@ class ProteinLigand_3DDataset(Dataset):
 
         self.transform = transform
         self.target_transform = target_transform
+        self.voxel_on = voxel_on
 
     def __len__(self):
         return len(self.affinity)
@@ -32,7 +34,10 @@ class ProteinLigand_3DDataset(Dataset):
             coords = np.dot(coords, selected_rotation)
 
         # convert into a grid
-        volume = convert_to_grid(coords, self.features[idx],
+        if self.voxel_on:
+            volume = apply_gauss_and_convert_to_grid(coords, self.features[idx], self.grid_spacing, max_dist=self.max_dist)
+        else:
+            volume = convert_to_grid(coords, self.features[idx],
                                  grid_resolution=self.grid_spacing, max_dist=self.max_dist)
         # (25,25,25,19)--> (19,25,25,25)
         volume = np.moveaxis(volume, -1, 0)
@@ -42,4 +47,5 @@ class ProteinLigand_3DDataset(Dataset):
         if self.target_transform:
             affinity = self.target_transform(affinity)
 
+        #print(f"{idx=} {volume.shape=} {affinity=}")
         return volume, affinity
