@@ -13,10 +13,10 @@ from omegaconf import DictConfig, OmegaConf
 import torch
 import torch.optim as optim
 from torch import nn, device, cuda, set_grad_enabled
-from torch.utils.data import DataLoader
 from torch.profiler import profile, tensorboard_trace_handler, ProfilerActivity, schedule
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
+from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
 ##### LOCAL
 from codes.videonucy import create_videonucy
@@ -90,14 +90,14 @@ def train(model, dl, ds_size, cfg, device, batch_size):
     ### TRAINING PHASE
     time_train = time.time()
     with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA],
-                 schedule=schedule(wait=1, warmup=3, active=12, repeat=5),
+                 schedule=schedule(wait=1, warmup=3, active=12, repeat=2),
                  on_trace_ready=tensorboard_trace_handler('./profiler'),
                  profile_memory=True) as prof:
         for epoch in range(cfg.training.num_epochs):
             master_print(f"Epoch {epoch + 1}/{cfg.training.num_epochs}")
             time_epoch = time.time()
             for phase in ['train', 'val']:
-                master_print(f"\tPhase {phase} ")
+                master_print(f"\tPhase {phase}")
                 model.train() if phase == 'train' else model.eval()
 
                 running_metrics = 0.0
@@ -142,7 +142,8 @@ def train(model, dl, ds_size, cfg, device, batch_size):
                     else:
                         patience += 1
 
-                mlflow.log_metric(f"{phase}_mse", epoch_metric, epoch)
+                if DIST.master_rank:
+                    mlflow.log_metric(f"{phase}_mse", epoch_metric, epoch)
 
             if patience > max_patience:
                 master_print("----------- Early stopping activated !")
@@ -167,11 +168,11 @@ def mlflow_setup(cfg):
         f.write(OmegaConf.to_yaml(cfg))
     mlflow.log_artifact("configuration.yaml")
 
-@hydra.main(config_path="./configs", config_name=f"videonucy_v4")
+@hydra.main(config_path="./configs", config_name=f"videonucy_v6")
 def main(cfg: DictConfig) -> None:
     by_complex = cfg.experiment.by_complex
     work = os.environ['WORK']
-    
+
     # create transformations
     rotations_matrices = build_rotations()
     master_print(f"Number of available rotations: {len(rotations_matrices)}")
@@ -206,6 +207,7 @@ def main(cfg: DictConfig) -> None:
                           shuffle=False,
                           num_workers=4,
                           pin_memory=True,
+                          drop_last=True,
                           persistent_workers=True,
                           sampler=train_sampler)
     val_dl = DataLoader(val_ds,
@@ -213,6 +215,7 @@ def main(cfg: DictConfig) -> None:
                         shuffle=False,
                         num_workers=4,
                         pin_memory=True,
+                        drop_last=True,
                         persistent_workers=True,
                         sampler=val_sampler)
 
@@ -232,18 +235,19 @@ def main(cfg: DictConfig) -> None:
 
     ddp_model = DDP(model, device_ids=[DIST.local_rank])
 
-    try:
-        mlflow.end_run()
-    except:
-        print("mlflow not running")
-
     if DIST.master_rank:
+        try:
+            mlflow.end_run()
+        except:
+            print("mlflow not running")
+
         mlflow.set_tracking_uri(cfg.experiment.path)
         mlflow.set_experiment(cfg.experiment.name)
 
 
     with mlflow.start_run(run_name=cfg.experiment.run) as run:
-        mlflow_setup(cfg)
+        if DIST.master_rank:
+            mlflow_setup(cfg)
 
         #train
         best_model, best_epoch, best_MSE = train(ddp_model,

@@ -22,6 +22,7 @@ class Complexes_4DDataset(Dataset):
         self.mode = mode.lower()  # either train, val or test
         self.rotations = rotations
         self.number_of_rotations = len(self.rotations) if rotations else 0
+        self.voxel_on = setup.voxel
 
         self.samples_list = self.read_samples_list(inputs)
         self.affinities = self.read_affinities(inputs.affinities)
@@ -115,7 +116,7 @@ class Complexes_4DDataset(Dataset):
             selected_rotation = self.rotations[randint(self.number_of_rotations)]
             # print(f"rotation {selected_rotation.shape}")
         inputs = []
-        frame = Frame(selected_rotation, self.charges_mean, self.charges_std, self.grid_spacing, self.max_dist)
+        frame = Frame(selected_rotation, self.charges_mean, self.charges_std, self.grid_spacing, self.max_dist, self.voxel_on)
         selected_frames = sample(list(range(len(frames))), self.frames)
         if self.keep_frames_in_order:
             selected_frames = sorted(selected_frames)
