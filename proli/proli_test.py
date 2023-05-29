@@ -8,7 +8,7 @@ import scipy.stats
 import torch
 from omegaconf import DictConfig, OmegaConf
 from torch.utils.data import DataLoader
-from torchinfo import summary
+#from torchinfo import summary
 
 from codes.pt_data import ProteinLigand_3DDataset
 from codes.raw_data import RawDataset
@@ -62,7 +62,7 @@ def my_app(cfg: DictConfig) -> None:
     model_path = os.path.join(cfg.path, cfg.model)
     model = torch.load(model_path)
 
-    summary(model, input_size=(10, 19, 25, 25, 25))
+    #summary(model, input_size=(10, 19, 25, 25, 25))
 
     # test dataset
     raw_data_test = RawDataset(cfg.data.input_dir, 'test', cfg.data.max_dist)
@@ -72,7 +72,7 @@ def my_app(cfg: DictConfig) -> None:
     print(raw_data_test)
 
     test_dataset = ProteinLigand_3DDataset(raw_data_test,
-                                           grid_spacing=cfg.data.grid_spacing, rotations=None)
+                                           grid_spacing=cfg.data.grid_spacing, rotations=None, voxel_on=cfg.data.voxel)
     batch_size = min(len(test_dataset), cfg.data.batch_size)
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True,
                                  persistent_workers=True)

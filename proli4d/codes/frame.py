@@ -1,7 +1,7 @@
 from math import ceil
 
 import numpy as np
-
+from codes.transform_voxel import apply_gauss_and_convert_to_grid
 
 class Frame:
     feature_names = ['B', 'C', 'N', 'O', 'P', 'S', 'Se', 'halogen', 'metal',
@@ -9,12 +9,13 @@ class Frame:
                      'hydrophobic', 'aromatic', 'acceptor', 'donor', 'ring']
     cols = {name: i for i, name in enumerate(feature_names)}
 
-    def __init__(self, selected_rotation=None, charges_mean=.0, charges_std=None, grid_spacing=1.0, max_dist=10.0):
+    def __init__(self, selected_rotation=None, charges_mean=.0, charges_std=None, grid_spacing=1.0, max_dist=10.0, voxel_on=False):
         self.selected_rotation = selected_rotation
         self.charges_mean = charges_mean
         self.charges_std = charges_std
         self.grid_spacing = grid_spacing
         self.max_dist = max_dist
+        self.voxel_on = voxel_on        
 
     @staticmethod
     def convert_to_grid(coords, features, grid_resolution=1.0, max_dist=10.0):
@@ -46,7 +47,11 @@ class Frame:
         if self.charges_std:
             features[:, Frame.cols['partialcharge']] = \
                 (features[:, Frame.cols['partialcharge']] - self.charges_mean) / self.charges_std
-
-        volume = self.convert_to_grid(coords, features, self.grid_spacing, self.max_dist)
+        # convert into a grid
+        if self.voxel_on:
+            volume = apply_gauss_and_convert_to_grid(coords, features, self.grid_spacing, max_dist=self.max_dist)
+        else:    
+            volume = self.convert_to_grid(coords, features, self.grid_spacing, self.max_dist)
+        
         volume = np.moveaxis(volume, -1, 0)  # (25,25,25,19)--> (19,25,25,25)
         return volume

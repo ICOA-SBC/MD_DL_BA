@@ -212,7 +212,7 @@ def mlflow_setup(cfg):
 def main(cfg: DictConfig) -> None:
     dev = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     torch.cuda.set_device(DIST.local_rank)
-    work = os.environ['WORK']
+    output_pdf = f"{os.environ['SCRATCH']}/_pafnucy/cnn_fcn_lstm/"
 
     master_print(f"Training with {DIST.size} gpu !")
 
@@ -318,11 +318,11 @@ def main(cfg: DictConfig) -> None:
             grid.ax_joint.xaxis.set_label_coords(0.5,-0.13)
             grid.ax_joint.yaxis.set_label_coords(-0.15,0.5)
             if cfg.network.mean_test:
-                grid.fig.savefig(f'{work}/deep_learning/MD_ConvLSTM/cnn_fcn_lstm/correlation_plot/CNN-LSTM_mean_{cfg.experiment.run}.pdf')
+                grid.fig.savefig(f'{output_pdf}/correlation_plot/CNN-LSTM_mean_{cfg.experiment.run}.pdf')
             elif cfg.network.sim_test:
-                grid.fig.savefig(f'{work}/deep_learning/MD_ConvLSTM/cnn_fcn_lstm/correlation_plot/CNN-LSTM_all_{cfg.experiment.run}.pdf')
+                grid.fig.savefig(f'{output_pdf}/correlation_plot/CNN-LSTM_all_{cfg.experiment.run}.pdf')
             else:
-                grid.fig.savefig(f'{work}/deep_learning/MD_ConvLSTM/cnn_fcn_lstm/correlation_plot/CNN-LSTM_random_{cfg.experiment.run}.pdf')
+                grid.fig.savefig(f'{output_pdf}/correlation_plot/CNN-LSTM_random_{cfg.experiment.run}.pdf')
 
     gpu_memory = torch.cuda.max_memory_allocated()
     print(f"--\nGPU usage on GPU {DIST.local_rank}: {convert_byte(gpu_memory)}\n--")

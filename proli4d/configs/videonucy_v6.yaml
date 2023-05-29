@@ -1,0 +1,53 @@
+hydra: #prevent hydra log from filing home
+  run:
+    dir: ${env:sos_CCFRSCRATCH}/_pafnucy/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S} 
+
+experiment:
+  name: convLSTM
+  run: training0  # mlflow runname
+  path: ${env:sos_CCFRSCRATCH}/_pafnucy/mlruns
+  by_complex: true  # if false, it is by simulation
+  model_path: ${env:sos_CCFRSCRATCH}/_pafnucy/models/convlstm
+  
+io:
+  by_complex_dir: ${env:sos_CCFRWORK}/_pafnucy/MD_ConvLSTM/cnn_fcn_lstm/inputs_v6/by_complex
+  by_sim_dir: ${env:sos_CCFRWORK}/_pafnucy/MD_ConvLSTM/cnn_fcn_lstm/inputs_v6/by_sim
+  train_samples: training_samples.txt
+  val_samples: validation_samples.txt
+  test_samples: test_samples_v6.txt
+  affinities:
+    - /gpfswork/rech/luh/commun/version4D/inputs/affinities/INDEX_general_PL_data.2019
+    - /gpfswork/rech/luh/commun/version4D/inputs/affinities/INDEX_refined_data.2019
+  train_dir: /gpfswork/rech/luh/commun/deep_learning/pafnucy/data/4D_data_v6/training_set
+  val_dir: /gpfswork/rech/luh/commun/deep_learning/pafnucy/data/4D_data_v6/validation_set
+  test_dir: /gpfswork/rech/luh/commun/deep_learning/pafnucy/data/4D_data_v6/test_set
+  
+data_setup:
+  grid_spacing: 1.0  # distance between grid points in angstrom
+  max_dist: 12  # max distance from complex center # TODO still useful 
+  partial_charges:  # previously computed on all simulations from train dataset
+    mean: -0.19125561 #v6
+    std: 0.65858211 #v6
+  frames: 50  # number of frames to be extracted from each simulation (max 50)
+  keep_frames_in_order: true
+  features: 19
+  # transform data into voxel
+  voxel: false  
+    
+training:
+  learning_rate: 1e-5  # learning rate
+  weight_decay: 1e-7  # lambda value for L2 regularisation of the loss
+  batch_size: 8  # batch size for one GPU, multi-GPU training
+  num_epochs: 100  # max number of epochs
+  patience: 10  # early stopping
+  
+network:
+  # number of channels before and after each ConvLSTM layer
+  convlstm_cfg: [19, 32, 64, 128]
+  # number of neurons before and after each FullyConnected layer
+  fc_cfg: [8192, 256]
+  pretrained_path:
+  mean_test:
+  sim_test:
+  
+debug: false

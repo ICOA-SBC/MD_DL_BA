@@ -9,7 +9,7 @@ import torch.optim as optim
 from omegaconf import DictConfig, OmegaConf
 from torch import nn
 from torch.utils.data import DataLoader
-from torchinfo import summary
+#from torchinfo import summary
 
 from codes.densenucy import create_densenucy
 from codes.pt_data import ProteinLigand_3DDataset
@@ -21,7 +21,7 @@ def convert_time(seconds):
     return time.strftime("%H:%M:%S", time.gmtime(seconds))
 
 
-def train(model, train_dataloader, valid_dataloader, dataset_size, cfg, model_path, name):
+def train(model, train_dataloader, valid_dataloader, dataset_size, cfg, model_path, experiment_name):
     dataloaders = {'train': train_dataloader, 'val': valid_dataloader}
     metric = nn.MSELoss(reduction='sum')
     criterion = nn.MSELoss(reduction='mean')
@@ -76,7 +76,7 @@ def train(model, train_dataloader, valid_dataloader, dataset_size, cfg, model_pa
                 print(f"/\\ Better loss {best_MSE} --> {epoch_metric}")
                 best_MSE, best_epoch = epoch_metric, epoch
                 best_model_wts = copy.deepcopy(model.state_dict())
-                filename = os.path.join(model_path, f"{name}_{best_MSE:.4f}_{best_epoch}.pth")
+                filename = os.path.join(model_path, f"{experiment_name}_{best_MSE:.4f}_{best_epoch}.pth")
                 print(f"\tsaving model {filename}")
                 torch.save(model, filename)
 
@@ -119,7 +119,7 @@ def test(model, test_dataloader, test_samples):
     mlflow.log_metric(f"test_MSELoss", metric)
 
 
-@hydra.main(config_path="./configs", config_name="dense")
+@hydra.main(config_path="./configs", config_name="cp_dense_voxel")
 def my_app(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
 
@@ -145,9 +145,9 @@ def my_app(cfg: DictConfig) -> None:
 
     # create dataset (pt) and dataloader
     train_dataset = ProteinLigand_3DDataset(raw_data_train,
-                                            grid_spacing=cfg.data.grid_spacing, rotations=rotations_matrices)
+                                            grid_spacing=cfg.data.grid_spacing, rotations=rotations_matrices, voxel_on=cfg.data.voxel)
     valid_dataset = ProteinLigand_3DDataset(raw_data_valid,
-                                            grid_spacing=cfg.data.grid_spacing, rotations=None)
+                                            grid_spacing=cfg.data.grid_spacing, rotations=None, voxel_on=cfg.data.voxel)
 
     dataset_size = {'train': len(train_dataset), 'val': len(valid_dataset)}
 
@@ -163,7 +163,7 @@ def my_app(cfg: DictConfig) -> None:
         cfg.network.dense_cfg,
         cfg.network.fc_cfg
     )
-    summary(model, input_size=(batch_size, 19, 25, 25, 25))
+    #summary(model, input_size=(batch_size, 19, 25, 25, 25))
 
     try:
         mlflow.end_run()
@@ -171,10 +171,9 @@ def my_app(cfg: DictConfig) -> None:
         print("mlflow not running")
 
     mlflow.set_tracking_uri(cfg.mlflow.path)
-    mlflow.set_experiment(cfg.mlflow.runname)
+    mlflow.set_experiment(cfg.experiment_name)
 
-    with mlflow.start_run() as run:
-        mlflow.log_param("name", cfg.name)
+    with mlflow.start_run(run_name=cfg.mlflow.run_name) as run:
         mlflow.log_param("batch_size", cfg.training.batch_size)
         mlflow.log_param("learning_rate", cfg.training.learning_rate)
         mlflow.log_param("weight_decay", cfg.training.weight_decay)
@@ -186,7 +185,7 @@ def my_app(cfg: DictConfig) -> None:
 
         # train
         best_model, best_epoch = train(model, train_dataloader, valid_dataloader, dataset_size, cfg.training,
-                                       cfg.io.model_path, cfg.name)
+                                       cfg.io.model_path, cfg.experiment_name)
         mlflow.log_param("best_epoch", best_epoch)
         # test
         raw_data_test = RawDataset(cfg.io.input_dir, 'test', cfg.data.max_dist)
@@ -196,12 +195,14 @@ def my_app(cfg: DictConfig) -> None:
         print(raw_data_test)
 
         test_dataset = ProteinLigand_3DDataset(raw_data_test,
-                                               grid_spacing=cfg.data.grid_spacing, rotations=None)
+                                               grid_spacing=cfg.data.grid_spacing, rotations=None, voxel_on=cfg.data.voxel)
 
         test_dataloader = DataLoader(test_dataset, batch_size=batch_size * 4,
                                      shuffle=False, num_workers=4, pin_memory=True, persistent_workers=True)
-
+        print(f"--------------------- Running test")
         test(best_model, test_dataloader, len(test_dataset))
+        print(f"--------------------- Running predict")
+
         mlflow.pytorch.log_model(best_model, "model")
 
 
