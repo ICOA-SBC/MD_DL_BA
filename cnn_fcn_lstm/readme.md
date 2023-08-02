@@ -40,8 +40,8 @@ The goal is to build txt files containing either :
 ```
 
 ```sh
-export INPUT_PATH=$dzc_ALL_CCFRWORK/deep_learning/pafnucy/data/4D_data_v3
-export OUTPUT_PATH=$dzc_CCFRWORK/version4D/inputs_v3/
+export INPUT_PATH=$luh_ALL_CCFRWORK/deep_learning/pafnucy/data/4D_data_v3
+export OUTPUT_PATH=$luh_CCFRWORK/version4D/inputs_v3/
 
 mkdir -p $OUTPUT_PATH/{by_complex,by_sim}
 
@@ -69,10 +69,10 @@ Don't forget to update the paths to theses files in the `yaml` config file
 This can take a while to compute (about 30 minutes for dataset_v3), so use a compute node for that (prepost, compil or a cpu partition).
 
 ```
-export INSTALL_DIR=$dzc_CCFRWORK/version4D
+export INSTALL_DIR=$luh_WORK/deep_learning/MD_ConvLSTM/cnn_fcn_lstm
 cd $INSTALL_DIR
 
-srun --pty --nodes=1 --ntasks-per-node=1 --cpus-per-task=5 --hint=nomultithread --partition=prepost  --time=02:00:00 --account dzc@v100 bash
+srun --pty --nodes=1 --ntasks-per-node=1 --cpus-per-task=5 --hint=nomultithread --partition=prepost  --time=02:00:00 --account luh@v100 bash
 
 module load pytorch-gpu/py3/1.11.0
 export PYTHONUSERBASE=$WORK/.local_convlstm
