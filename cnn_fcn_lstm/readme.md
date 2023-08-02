@@ -69,7 +69,7 @@ Don't forget to update the paths to theses files in the `yaml` config file
 This can take a while to compute (about 30 minutes for dataset_v3), so use a compute node for that (prepost, compil or a cpu partition).
 
 ```
-export INSTALL_DIR=$luh_WORK/deep_learning/MD_ConvLSTM/cnn_fcn_lstm
+export INSTALL_DIR=$luh_CCFRWORK/deep_learning/MD_ConvLSTM/cnn_fcn_lstm
 cd $INSTALL_DIR
 
 srun --pty --nodes=1 --ntasks-per-node=1 --cpus-per-task=5 --hint=nomultithread --partition=prepost  --time=02:00:00 --account luh@v100 bash
