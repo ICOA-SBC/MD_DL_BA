@@ -1,0 +1,15 @@
+artifact_uri: /mnt/data2/dataset/dynamic/single_frame2/datasets/MD_DL_BA/Proli/outputs/2023-11-18/23-35-19/../../../../logs/808159068045680918/49911622490f429799f09908f8a8c7d0/artifacts
+end_time: 1700346922542
+entry_point_name: ''
+experiment_id: '808159068045680918'
+lifecycle_stage: active
+run_id: 49911622490f429799f09908f8a8c7d0
+run_name: replicate_1
+run_uuid: 49911622490f429799f09908f8a8c7d0
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1700346921757
+status: 4
+tags: []
+user_id: libouban@ICOA-03.LOCAL

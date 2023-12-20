@@ -1,0 +1,29 @@
+mlflow:
+  path: ../../../../logs  # path to store mlflow experience
+  run_name: replicate-1  # name of the mlflow experience
+    
+io:
+  input_dir: ../../../../datasets/CoG_12  # path to train, val and test dataset as h5py files # download training/validation set from zenodo
+  model_path: ../../../models/densenucy_rotations  # path where are saved the trained model
+  specific_test_dir:  # if path test dataset is different from training/validation datasets
+
+data:
+  grid_spacing: 1.0  # distance between grid points in angstrom
+  max_dist: 12  # max distance from complex center
+  voxel: false  # use gaussian distribution on voxel
+
+training:
+  learning_rate: 1e-5  # learning rate
+  weight_decay: 0.0001  # lambda for weight decay
+  batch_size: 20  # batch size
+  num_epochs: 800  # max number of epochs
+  patience: 20  # early stopping
+  only_test:  # if true, only predict on test set (no training)
+  
+network:
+  growth_rate: 96  # number of channels added after each conv block in dense block
+  dense_cfg: [2, 2]  # number of conv blocks in each dense block
+  fc_cfg: [10240]  # number of neurons in each fc block. The first element depends on growth_rate, dense_cfg and input_size 
+  pretrained_path:  # path for a specific pretrained model
+
+experiment_name: densenucy_rotation

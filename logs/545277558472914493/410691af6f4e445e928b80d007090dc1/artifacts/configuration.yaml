@@ -1,0 +1,28 @@
+mlflow:
+  path: ../../../../logs
+  run_name: replicate_1
+io:
+  input_dir: ../../../../datasets/CoG_12
+  model_path: ../../../models/densenucy
+  specific_test_dir: null
+data:
+  grid_spacing: 1.0
+  max_dist: 12
+  voxel: false
+training:
+  learning_rate: 1.0e-05
+  weight_decay: 0.0001
+  batch_size: 20
+  num_epochs: 200
+  patience: 20
+  only_test: true
+network:
+  growth_rate: 96
+  dense_cfg:
+  - 2
+  - 2
+  fc_cfg:
+  - 10240
+  pretrained_path: ../../../models/densenucy/complex/densenucy_17274-complexes_5945-complexes-with-MD_59441-simulations_2925609-frames_all_with_structure.pth
+experiment_name: densenucy
+debug: false

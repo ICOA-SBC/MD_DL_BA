@@ -1,0 +1,15 @@
+artifact_uri: /mnt/data2/dataset/dynamic/single_frame2/datasets/MD_DL_BA/Densenucy/outputs/2023-11-19/15-09-22/../../../../logs/592749786527194770/fd2b0166f32341f2ac3ed7b9402ce3b2/artifacts
+end_time: 1700402983459
+entry_point_name: ''
+experiment_id: '592749786527194770'
+lifecycle_stage: active
+run_id: fd2b0166f32341f2ac3ed7b9402ce3b2
+run_name: densenucy_rot
+run_uuid: fd2b0166f32341f2ac3ed7b9402ce3b2
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1700402963437
+status: 3
+tags: []
+user_id: libouban@ICOA-03.LOCAL
