@@ -90,11 +90,11 @@ Duration: 00:40:27
 
 ## Model architecture
 
-The model doesn't duplicate the CNN-LSTM / LRCN part: all the frames will go through a unique CNN. Then each output (as many as the frame number) will be concatenated and will feed the LSTM layers.
+Basically, the model doesn't duplicate the CNN-LSTM / LRCN part: all the frames will go through a unique CNN. Then each output (as many as the frame number) will be concatenated and will feed the LSTM layers.
 
-Basically, the CNN part should be able to predict the affinity and the LSTM part add an interpretation level to this sequence of affinity to output a single prediction.
+Basically, the CNN-LSTM part should be able to predict the affinity and the LSTM part add an interpretation level to this sequence of affinity to output a single prediction.
 
-The CNN-LSTM / LRCN part is inspired by the models used on 3D data:
+The CNN-LSTM part is inspired by the models used on 3D data:
 * `cnn.py` contains regular Conv3d layers
 * `densecnn.py` contains DenseBlock (as found in **densenet**)
 
@@ -129,7 +129,7 @@ python timenucy_train.py \
 
 ## Testing
 
-Metrics are computed on the test set at the end of the training in `timenucy_train.py` but it is possible to perform solely the evaluation of a model by using `timenucy_test.py`. It works on a single GPU.
+Metrics are computed at the end of the training in `timenucy_train.py` but it is possible to launch this computation apart with `timenucy_test.py`, it works on a single GPU.
 
 ```commandline
 conda activate MD_DL_BA_env

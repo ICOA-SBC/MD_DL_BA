@@ -23,7 +23,7 @@ training:
 network:
   growth_rate: 96  # number of channels added after each conv block in dense block
   dense_cfg: [2, 2]  # number of conv blocks in each dense block
-  fc_cfg: [10240]  # number of neurons in each fc block. The first element depends on growth_rate, dense_cfg and input_size 
+  fc_cfg: [10240]  # number of neurons in each fc block. The first element depends on growth_rate, dense_cfg and input_size 
   pretrained_path:  # path for a specific pretrained model
 
 experiment_name: densenucy_rotation

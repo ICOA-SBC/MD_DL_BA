@@ -5,7 +5,7 @@ mlflow:
 io:
   input_dir: ../../../../datasets/CoG_12  # path to train, val and test dataset as h5py files # download training/validation set from zenodo
   model_path: ../../../models/proli  # path where are saved the trained model
-  specific_test_dir: # if path test dataset is different from training/validation datasets
+  specific_test_dir:  # if path test dataset is different from training/validation datasets
 
 data:
   grid_spacing: 1.0  # distance between grid points in angstrom

@@ -1,0 +1,48 @@
+experiment:  # mlflow data
+  name: timenucy
+  run: debug2  # mlflow runname
+  path: ../../../../logs  # path for mlflow
+  by_complex: true  # use a random simulation per complex for each epoch, if 'false' use all the simulations (by simulation)
+  model_path: ../../../models  # path to save models
+
+model:
+  architecture: single_cnn  # TODO add other options
+
+io:
+  by_complex_dir: ../../../../datasets/version4D/inputs/by_complex
+  by_sim_dir: ../../../../datasets/version4D/inputs/by_sim
+  train_samples: training_samples.txt
+  val_samples: validation_samples.txt
+  test_samples: test_samples.txt
+  affinities:
+    - ../../../../datasets/version4D/affinities/INDEX_general_PL_data.2019
+    - ../../../../datasets/version4D/affinities/INDEX_refined_data.2019
+  train_dir: ../../../../datasets/4D_data/training_set  # download from https://zenodo.org/uploads/10390550
+  val_dir: ../../../../datasets/4D_data/validation_set  # download from https://zenodo.org/uploads/10390550
+  test_dir: ../../../../datasets/4D_data/test_set  # download from https://zenodo.org/uploads/10390550
+  
+data_setup:
+  grid_spacing: 1.0  # distance between grid points in angstrom
+  max_dist: 12  # max distance from complex center # TODO still useful 
+  partial_charges:  # previously computed on all simulations from train dataset
+    mean: -0.19065223
+    std: 0.45264780
+  frames: 50  # 50 is the maximum, less mean that #frames will be randomly chosen
+  keep_frames_in_order: true
+  features: 19
+  voxel: false  # use gaussian distribution on voxel
+
+training:
+  learning_rate: 1e-4  # learning rate
+  weight_decay: 0.0001  # lambda for weight decay
+  batch_size: 16  # batch size
+  num_epochs: 300  # max number of epochs
+  patience: 20  # early stopping
+  warmup_epochs: 10
+
+network:
+  pretrained_path:  # path for a specific pretrained model
+  mean_test:  # compute the mean over simulations when having several simulations for the same test set complex 
+  sim_test:  # evaluate model on all simulations from test sets, if 'false' use only a random one per test set complex
+
+debug: false
