@@ -1,0 +1,3 @@
+In the github, we provided only a model for each training method.
+All the models can be downloaded from https://zenodo.org/uploads/10390550
+They are available in videonucy.zip

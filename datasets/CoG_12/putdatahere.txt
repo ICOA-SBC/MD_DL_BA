@@ -1,0 +1,3 @@
+From https://zenodo.org/uploads/10390550
+Retrieve initial_training_set.zip initial_validation_set.zip initial_test_set.zip
+Extract the files here.

@@ -1,6 +1,0 @@
-artifact_location: /mnt/data2/dataset/dynamic/single_frame2/datasets/MD_DL_BA/Videonucy/outputs/2023-11-16/15-54-12/../../../../logs/880747066327301372
-creation_time: 1700146453952
-experiment_id: '880747066327301372'
-last_update_time: 1700146453952
-lifecycle_stage: active
-name: convLSTM

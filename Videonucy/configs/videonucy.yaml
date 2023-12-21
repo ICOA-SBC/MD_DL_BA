@@ -14,9 +14,9 @@ io:
   affinities:
     - ../../../../datasets/version4D/affinities/INDEX_general_PL_data.2019
     - ../../../../datasets/version4D/affinities/INDEX_refined_data.2019
-  train_dir: ../../../../datasets/4D_data/training_set  # download from zenodo
-  val_dir: ../../../../datasets/4D_data/validation_set  # download from zenodo
-  test_dir: ../../../../datasets/4D_data/test_set  # download from zenodo
+  train_dir: ../../../../datasets/4D_data/training_set  # download from https://zenodo.org/uploads/10390550
+  val_dir: ../../../../datasets/4D_data/validation_set  # download from https://zenodo.org/uploads/10390550
+  test_dir: ../../../../datasets/4D_data/test_set  # download from https://zenodo.org/uploads/10390550
 
 data_setup:
   grid_spacing: 1.0  # distance between grid points in angstrom

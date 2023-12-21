@@ -1,0 +1,3 @@
+From https://zenodo.org/uploads/10390550
+Retrieve reduced_training_set.zip reduced_validation_set.zip reduced_test_set.zip
+Extract the files here.

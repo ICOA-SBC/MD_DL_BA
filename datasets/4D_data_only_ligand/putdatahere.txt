@@ -1,0 +1,3 @@
+From https://zenodo.org/uploads/10390550
+Retrieve 4D_only_ligand_training_set.zip 4D_only_ligand_validation_set.zip 4D_only_ligand_test_set.zip
+Extract the files here.
