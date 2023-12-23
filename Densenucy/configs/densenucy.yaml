@@ -3,7 +3,7 @@ mlflow:
   run_name: replicate-1  # name of the mlflow experience
 
 io:
-  input_dir: ../../../../datasets/CoG_12  # path to train, val and test dataset as h5py files # download training/validation set from zenodo
+  input_dir: ../../../../datasets/no_MD  # path to train, val and test dataset as h5py files # download training/validation set from https://zenodo.org/uploads/10390550
   model_path: ../../../models/densenucy  # path where are saved the trained model
   specific_test_dir:  # if path test dataset is different from training/validation datasets
 
