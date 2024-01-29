@@ -1,0 +1,213 @@
+Sat Aug 19 20:33:39 CEST 2023
+mlflow:
+  path: ${env:luh_CCFRSCRATCH}/mlruns
+  run_name: 17277-complexes_5946-complexes-with-MD_59451-simulations_2926102-frames_all_with_structure_only_ligand_10
+io:
+  input_dir: /gpfswork/rech/luh/commun/deep_learning/pafnucy/data/data_augmentation_all_3M_with_structural_only_ligand
+  model_path: ${env:luh_CCFRSCRATCH}/models/proli
+  specific_test_dir: /gpfswork/rech/luh/commun/deep_learning/pafnucy/data/data_augmentation_all_3M_with_structural_only_ligand
+data:
+  grid_spacing: 1.0
+  max_dist: 12
+  voxel: false
+training:
+  learning_rate: 1.0e-05
+  weight_decay: 0.0001
+  batch_size: 20
+  num_epochs: 200
+  patience: 20
+  only_test: null
+network:
+  conv_channels:
+  - 19
+  - 64
+  - 128
+  - 256
+  conv_kernel_size: 5
+  pool_kernel_size: 2
+  dense_sizes:
+  - 16384
+  - 1000
+  - 500
+  - 200
+  drop_p: 0.2
+  pretrained_path: null
+experiment_name: proli_data_augmentation_only_ligand
+
+training dataset with 2340730 samples
+	Partial charge normalization: m= -0.12426730245351791                     std= 0.4301050901412964
+
+validation dataset with 585372 samples
+	Partial charge normalization: m= -0.12426730245351791                     std= 0.4301050901412964
+
+Number of available rotations: 24
+TMP: cfg.data.voxel=False
+Epoch 1/200
+	[train] MSELoss 2.8304
+	[val] MSELoss 2.6272 	 Duration: 7661.56
+/\ Better loss 100.0 --> 2.6271955348767184
+	saving model proli_data_augmentation_only_ligand
+	saving model /gpfsscratch/rech/luh/uqu41fu/models/proli/proli_0_2.6272.pth
+Epoch 2/200
+	[train] MSELoss 2.3831
+	[val] MSELoss 2.4798 	 Duration: 7672.83
+/\ Better loss 2.6271955348767184 --> 2.47977804433158
+	saving model proli_data_augmentation_only_ligand
+	saving model /gpfsscratch/rech/luh/uqu41fu/models/proli/proli_1_2.4798.pth
+Epoch 3/200
+	[train] MSELoss 1.9864
+	[val] MSELoss 2.4808 	 Duration: 7661.21
+Epoch 4/200
+	[train] MSELoss 1.5019
+	[val] MSELoss 2.3623 	 Duration: 7663.08
+/\ Better loss 2.47977804433158 --> 2.3622510392488696
+	saving model proli_data_augmentation_only_ligand
+	saving model /gpfsscratch/rech/luh/uqu41fu/models/proli/proli_3_2.3623.pth
+Epoch 5/200
+	[train] MSELoss 1.1188
+	[val] MSELoss 2.3459 	 Duration: 7663.31
+/\ Better loss 2.3622510392488696 --> 2.3458876469694974
+	saving model proli_data_augmentation_only_ligand
+	saving model /gpfsscratch/rech/luh/uqu41fu/models/proli/proli_4_2.3459.pth
+Epoch 6/200
+	[train] MSELoss 0.8740
+	[val] MSELoss 2.3948 	 Duration: 7664.65
+Epoch 7/200
+	[train] MSELoss 0.7265
+	[val] MSELoss 2.3944 	 Duration: 7663.50
+Epoch 8/200
+	[train] MSELoss 0.6293
+	[val] MSELoss 2.3925 	 Duration: 7664.28
+Epoch 9/200
+	[train] MSELoss 0.5614
+	[val] MSELoss 2.3406 	 Duration: 7664.36
+/\ Better loss 2.3458876469694974 --> 2.3406382277140536
+	saving model proli_data_augmentation_only_ligand
+	saving model /gpfsscratch/rech/luh/uqu41fu/models/proli/proli_8_2.3406.pth
+Epoch 10/200
+	[train] MSELoss 0.5124
+	[val] MSELoss 2.3270 	 Duration: 7665.13
+/\ Better loss 2.3406382277140536 --> 2.3270476109468206
+	saving model proli_data_augmentation_only_ligand
+	saving model /gpfsscratch/rech/luh/uqu41fu/models/proli/proli_9_2.3270.pth
+Epoch 11/200
+	[train] MSELoss 0.4741
+	[val] MSELoss 2.3407 	 Duration: 7664.27
+Epoch 12/200
+	[train] MSELoss 0.4438
+	[val] MSELoss 2.3556 	 Duration: 7663.59
+Epoch 13/200
+	[train] MSELoss 0.4192
+	[val] MSELoss 2.3779 	 Duration: 7655.27
+Epoch 14/200
+	[train] MSELoss 0.3984
+	[val] MSELoss 2.3873 	 Duration: 7655.98
+Epoch 15/200
+	[train] MSELoss 0.3811
+	[val] MSELoss 2.3580 	 Duration: 7651.62
+Epoch 16/200
+	[train] MSELoss 0.3655
+	[val] MSELoss 2.3167 	 Duration: 7652.52
+/\ Better loss 2.3270476109468206 --> 2.3166688678122243
+	saving model proli_data_augmentation_only_ligand
+	saving model /gpfsscratch/rech/luh/uqu41fu/models/proli/proli_15_2.3167.pth
+Epoch 17/200
+	[train] MSELoss 0.3519
+	[val] MSELoss 2.3391 	 Duration: 7653.88
+Epoch 18/200
+	[train] MSELoss 0.3404
+	[val] MSELoss 2.3017 	 Duration: 7665.23
+/\ Better loss 2.3166688678122243 --> 2.3016825743933267
+	saving model proli_data_augmentation_only_ligand
+	saving model /gpfsscratch/rech/luh/uqu41fu/models/proli/proli_17_2.3017.pth
+Epoch 19/200
+	[train] MSELoss 0.3297
+	[val] MSELoss 2.3666 	 Duration: 7719.42
+Epoch 20/200
+	[train] MSELoss 0.3206
+	[val] MSELoss 2.3703 	 Duration: 7770.10
+Epoch 21/200
+	[train] MSELoss 0.3113
+	[val] MSELoss 2.3743 	 Duration: 7808.28
+Epoch 22/200
+	[train] MSELoss 0.3042
+	[val] MSELoss 2.3702 	 Duration: 7821.71
+Epoch 23/200
+	[train] MSELoss 0.2972
+	[val] MSELoss 2.3375 	 Duration: 7820.20
+Epoch 24/200
+	[train] MSELoss 0.2906
+	[val] MSELoss 2.3538 	 Duration: 7822.88
+Epoch 25/200
+	[train] MSELoss 0.2845
+	[val] MSELoss 2.3506 	 Duration: 7800.66
+Epoch 26/200
+	[train] MSELoss 0.2799
+	[val] MSELoss 2.3603 	 Duration: 7806.25
+Epoch 27/200
+	[train] MSELoss 0.2740
+	[val] MSELoss 2.4212 	 Duration: 7807.90
+Epoch 28/200
+	[train] MSELoss 0.2699
+	[val] MSELoss 2.3476 	 Duration: 7822.68
+Epoch 29/200
+	[train] MSELoss 0.2648
+	[val] MSELoss 2.3812 	 Duration: 7840.09
+Epoch 30/200
+	[train] MSELoss 0.2609
+	[val] MSELoss 2.3728 	 Duration: 7846.68
+Epoch 31/200
+	[train] MSELoss 0.2569
+	[val] MSELoss 2.3727 	 Duration: 7719.39
+Epoch 32/200
+	[train] MSELoss 0.2524
+	[val] MSELoss 2.3702 	 Duration: 7695.36
+Epoch 33/200
+	[train] MSELoss 0.2500
+	[val] MSELoss 2.4213 	 Duration: 7690.66
+Epoch 34/200
+	[train] MSELoss 0.2463
+	[val] MSELoss 2.4045 	 Duration: 7797.12
+Epoch 35/200
+	[train] MSELoss 0.2436
+	[val] MSELoss 2.4151 	 Duration: 7849.96
+Epoch 36/200
+	[train] MSELoss 0.2402
+	[val] MSELoss 2.3563 	 Duration: 7825.80
+Epoch 37/200
+	[train] MSELoss 0.2371
+	[val] MSELoss 2.3946 	 Duration: 7873.70
+Epoch 38/200
+	[train] MSELoss 0.2345
+	[val] MSELoss 2.4198 	 Duration: 7873.37
+Epoch 39/200
+	[train] MSELoss 0.2322
+	[val] MSELoss 2.3889 	 Duration: 7877.30
+----------- Early stopping activated !
+
+
+_____________________________________________
+[39 / 200] Best mean MSE: 2.3017 at epoch 17             
+	Total duration: 11:49:58
+_____________________________________________
+test dataset with 285 samples
+	Partial charge normalization: m= -0.12426730245351791                     std= 0.4301050901412964
+
+<codes.pt_data.ProteinLigand_3DDataset object at 0x14c573472eb0>
+--------------------- Running test
+	[Test] MSELoss 2.9300
+--------------------- Running predict
+Computed preds on 285/285 samples! (expected: 285)
+
+    Analysis:
+        rmse= 1.7117382404704256
+        mae= 1.3996126174926757
+        corr= (0.6172792995795864, 2.53289912016542e-31)
+    
+[TEST] rmse: 1.7117 mae: 1.3996 corr: (0.6172792995795864, 2.53289912016542e-31)
+	saving model /gpfsscratch/rech/luh/uqu41fu/models/proli/proli_17277-complexes_5946-complexes-with-MD_59451-simulations_2926102-frames_all_with_structure_only_ligand_10.pth
+915586048
+--
+GPU usage: 873.2MiB
+--
+Wed Aug 23 19:15:59 CEST 2023

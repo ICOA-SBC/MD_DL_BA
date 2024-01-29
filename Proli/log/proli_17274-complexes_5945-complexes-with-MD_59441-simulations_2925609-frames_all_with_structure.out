@@ -1,0 +1,137 @@
+Wed Aug  9 10:05:11 CEST 2023
+mlflow:
+  path: ${env:luh_CCFRSCRATCH}/mlruns
+  run_name: 17274-complexes_5945-complexes-with-MD_59441-simulations_2925609-frames_all_with_structure_1
+io:
+  input_dir: /gpfswork/rech/luh/commun/deep_learning/pafnucy/data/data_augmentation_all_3M_with_structural
+  model_path: ${env:luh_CCFRSCRATCH}/models/proli
+  specific_test_dir: ${env:luh_ALL_CCFRWORK}/deep_learning/pafnucy/data/CoG_12
+data:
+  grid_spacing: 1.0
+  max_dist: 12
+  voxel: false
+training:
+  learning_rate: 1.0e-05
+  weight_decay: 0.0001
+  batch_size: 20
+  num_epochs: 200
+  patience: 20
+  only_test: null
+network:
+  conv_channels:
+  - 19
+  - 64
+  - 128
+  - 256
+  conv_kernel_size: 5
+  pool_kernel_size: 2
+  dense_sizes:
+  - 16384
+  - 1000
+  - 500
+  - 200
+  drop_p: 0.2
+  pretrained_path: /gpfsscratch/rech/luh/uqu41fu/models/proli/proli_19_2.1594.pth
+experiment_name: proli_data_augmentation
+
+training dataset with 2340237 samples
+	Partial charge normalization: m= -0.1904931366443634                     std= 0.4524168372154236
+
+validation dataset with 585372 samples
+	Partial charge normalization: m= -0.1904931366443634                     std= 0.4524168372154236
+
+Number of available rotations: 24
+TMP: cfg.data.voxel=False
+Model successfully loaded
+pretrained model: epoch 19 with MSELoss 2.1594
+Epoch 20/200
+	[train] MSELoss 0.1384
+	[val] MSELoss 2.2616 	 Duration: 2313.65
+Epoch 21/200
+	[train] MSELoss 0.1329
+	[val] MSELoss 2.2390 	 Duration: 2304.46
+Epoch 22/200
+	[train] MSELoss 0.1281
+	[val] MSELoss 2.2457 	 Duration: 2309.46
+Epoch 23/200
+	[train] MSELoss 0.1245
+	[val] MSELoss 2.2470 	 Duration: 2321.01
+Epoch 24/200
+	[train] MSELoss 0.1202
+	[val] MSELoss 2.2527 	 Duration: 2304.24
+Epoch 25/200
+	[train] MSELoss 0.1168
+	[val] MSELoss 2.2770 	 Duration: 2314.23
+Epoch 26/200
+	[train] MSELoss 0.1128
+	[val] MSELoss 2.2191 	 Duration: 2304.25
+Epoch 27/200
+	[train] MSELoss 0.1102
+	[val] MSELoss 2.2624 	 Duration: 2296.65
+Epoch 28/200
+	[train] MSELoss 0.1075
+	[val] MSELoss 2.3179 	 Duration: 2294.55
+Epoch 29/200
+	[train] MSELoss 0.1049
+	[val] MSELoss 2.2491 	 Duration: 2303.21
+Epoch 30/200
+	[train] MSELoss 0.1025
+	[val] MSELoss 2.2671 	 Duration: 2296.41
+Epoch 31/200
+	[train] MSELoss 0.0997
+	[val] MSELoss 2.1983 	 Duration: 2315.10
+Epoch 32/200
+	[train] MSELoss 0.0979
+	[val] MSELoss 2.3024 	 Duration: 2303.89
+Epoch 33/200
+	[train] MSELoss 0.0958
+	[val] MSELoss 2.2400 	 Duration: 2295.58
+Epoch 34/200
+	[train] MSELoss 0.0937
+	[val] MSELoss 2.1857 	 Duration: 2297.43
+Epoch 35/200
+	[train] MSELoss 0.0919
+	[val] MSELoss 2.2901 	 Duration: 2312.34
+Epoch 36/200
+	[train] MSELoss 0.0904
+	[val] MSELoss 2.2833 	 Duration: 2314.34
+Epoch 37/200
+	[train] MSELoss 0.0891
+	[val] MSELoss 2.2564 	 Duration: 2302.52
+Epoch 38/200
+	[train] MSELoss 0.0874
+	[val] MSELoss 2.3089 	 Duration: 2303.26
+Epoch 39/200
+	[train] MSELoss 0.0865
+	[val] MSELoss 2.3262 	 Duration: 2306.79
+Epoch 40/200
+	[train] MSELoss 0.0844
+	[val] MSELoss 2.2957 	 Duration: 2309.38
+----------- Early stopping activated !
+
+
+_____________________________________________
+[40 / 200] Best mean MSE: 2.1594 at epoch 19             
+	Total duration: 13:27:02
+_____________________________________________
+test dataset with 285 samples
+	Partial charge normalization: m= -0.1904931366443634                     std= 0.4524168372154236
+
+<codes.pt_data.ProteinLigand_3DDataset object at 0x1530c5e58820>
+--------------------- Running test
+	[Test] MSELoss 2.4780
+--------------------- Running predict
+Computed preds on 285/285 samples! (expected: 285)
+
+    Analysis:
+        rmse= 1.5741576066141647
+        mae= 1.2482634904091818
+        corr= (0.6941045141608795, 2.7304968621563744e-42)
+    
+[TEST] rmse: 1.5742 mae: 1.2483 corr: (0.6941045141608795, 2.7304968621563744e-42)
+	saving model /gpfsscratch/rech/luh/uqu41fu/models/proli/proli_17274-complexes_5945-complexes-with-MD_59441-simulations_2925609-frames_all_with_structure_1.pth
+915962368
+--
+GPU usage: 873.5MiB
+--
+Thu Aug 10 03:47:38 CEST 2023

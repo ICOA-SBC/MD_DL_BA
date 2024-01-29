@@ -1,0 +1,798 @@
+Thu Jul 13 09:39:27 CEST 2023
+mlflow:
+  path: ${oc.env:luh_CCFRSCRATCH}/mlruns
+  run_name: CoG12_6
+io:
+  input_dir: /gpfswork/rech/luh/commun/deep_learning/pafnucy/data/CoG_12
+  model_path: ${oc.env:luh_CCFRSCRATCH}/models/densenucy_rotations
+  specific_test_dir: ${oc.env:luh_ALL_CCFRWORK}/deep_learning/pafnucy/data/CoG_12
+data:
+  grid_spacing: 1.0
+  max_dist: 12
+  voxel: false
+training:
+  learning_rate: 1.0e-05
+  weight_decay: 0.0001
+  batch_size: 20
+  num_epochs: 800
+  patience: 20
+  only_test: null
+network:
+  growth_rate: 96
+  dense_cfg:
+  - 2
+  - 2
+  fc_cfg:
+  - 10240
+  pretrained_path: null
+experiment_name: densenucy_systematic_data_augmentation
+
+training dataset with 13800 samples
+	Partial charge normalization: m= -0.1401471346616745                     std= 0.4216829240322113
+
+validation dataset with 3479 samples
+	Partial charge normalization: m= -0.1401471346616745                     std= 0.4216829240322113
+
+Number of available rotations: 24
+===============================================================================================
+Layer (type:depth-idx)                        Output Shape              Param #
+===============================================================================================
+Densenucy                                     --                        --
+├─Sequential: 1-1                             [20, 160, 4, 4, 4]        --
+│    └─Sequential: 2-1                        [20, 64, 13, 13, 13]      --
+│    │    └─Conv3d: 3-1                       [20, 64, 25, 25, 25]      32,896
+│    │    └─BatchNorm3d: 3-2                  [20, 64, 25, 25, 25]      128
+│    │    └─ReLU: 3-3                         [20, 64, 25, 25, 25]      --
+│    │    └─MaxPool3d: 3-4                    [20, 64, 13, 13, 13]      --
+│    └─DenseBlock: 2-2                        [20, 256, 13, 13, 13]     --
+│    └─Sequential: 2-3                        [20, 128, 7, 7, 7]        --
+│    │    └─Conv3d: 3-5                       [20, 128, 13, 13, 13]     32,896
+│    │    └─BatchNorm3d: 3-6                  [20, 128, 13, 13, 13]     256
+│    │    └─ReLU: 3-7                         [20, 128, 13, 13, 13]     --
+│    │    └─AvgPool3d: 3-8                    [20, 128, 7, 7, 7]        --
+│    └─DenseBlock: 2-4                        [20, 320, 7, 7, 7]        --
+│    └─Sequential: 2-5                        [20, 160, 4, 4, 4]        --
+│    │    └─Conv3d: 3-9                       [20, 160, 7, 7, 7]        51,360
+│    │    └─BatchNorm3d: 3-10                 [20, 160, 7, 7, 7]        320
+│    │    └─ReLU: 3-11                        [20, 160, 7, 7, 7]        --
+│    │    └─AvgPool3d: 3-12                   [20, 160, 4, 4, 4]        --
+├─Sequential: 1-2                             [20, 1]                   --
+│    └─Linear: 2-6                            [20, 1]                   10,241
+===============================================================================================
+Total params: 1,622,241
+Trainable params: 1,622,241
+Non-trainable params: 0
+Total mult-adds (G): 43.86
+===============================================================================================
+Input size (MB): 23.75
+Forward/backward pass size (MB): 583.61
+Params size (MB): 6.49
+Estimated Total Size (MB): 613.85
+===============================================================================================
+Epoch 1/800
+	[train - 0/24] MSELoss 3.8340
+	[train - 1/24] MSELoss 3.0683
+	[train - 2/24] MSELoss 2.8455
+	[train - 3/24] MSELoss 2.7118
+	[train - 4/24] MSELoss 2.6615
+	[train - 5/24] MSELoss 2.6208
+	[train - 6/24] MSELoss 2.5782
+	[train - 7/24] MSELoss 2.5447
+	[train - 8/24] MSELoss 2.5098
+	[train - 9/24] MSELoss 2.4742
+	[train - 10/24] MSELoss 2.4601
+	[train - 11/24] MSELoss 2.4516
+	[train - 12/24] MSELoss 2.4548
+	[train - 13/24] MSELoss 2.4188
+	[train - 14/24] MSELoss 2.4242
+	[train - 15/24] MSELoss 2.3900
+	[train - 16/24] MSELoss 2.4078
+	[train - 17/24] MSELoss 2.3786
+	[train - 18/24] MSELoss 2.3715
+	[train - 19/24] MSELoss 2.3552
+	[train - 20/24] MSELoss 2.3545
+	[train - 21/24] MSELoss 2.3540
+	[train - 22/24] MSELoss 2.3435
+	[train - 23/24] MSELoss 2.3410
+	[val - 23/24] MSELoss 2.4496                                 	 Duration: 353.09
+/\ Better loss 100.0 --> 2.4495961317285513 at the end of an epoch * 24 rotations
+Epoch 2/800
+	[train - 0/24] MSELoss 2.3259
+	[train - 1/24] MSELoss 2.3128
+	[train - 2/24] MSELoss 2.3001
+	[train - 3/24] MSELoss 2.2961
+	[train - 4/24] MSELoss 2.2944
+	[train - 5/24] MSELoss 2.2805
+	[train - 6/24] MSELoss 2.2670
+	[train - 7/24] MSELoss 2.2776
+	[train - 8/24] MSELoss 2.2646
+	[train - 9/24] MSELoss 2.2395
+	[train - 10/24] MSELoss 2.2360
+	[train - 11/24] MSELoss 2.2370
+	[train - 12/24] MSELoss 2.2440
+	[train - 13/24] MSELoss 2.2225
+	[train - 14/24] MSELoss 2.2431
+	[train - 15/24] MSELoss 2.2228
+	[train - 16/24] MSELoss 2.2325
+	[train - 17/24] MSELoss 2.2173
+	[train - 18/24] MSELoss 2.2099
+	[train - 19/24] MSELoss 2.2125
+	[train - 20/24] MSELoss 2.1977
+	[train - 21/24] MSELoss 2.2049
+	[train - 22/24] MSELoss 2.2030
+	[train - 23/24] MSELoss 2.1791
+	[val - 23/24] MSELoss 2.3543                                 	 Duration: 351.31
+/\ Better loss 2.4495961317285513 --> 2.354342897036323 at the end of an epoch * 24 rotations
+Epoch 3/800
+	[train - 0/24] MSELoss 2.1950
+	[train - 1/24] MSELoss 2.1781
+	[train - 2/24] MSELoss 2.1628
+	[train - 3/24] MSELoss 2.1694
+	[train - 4/24] MSELoss 2.1719
+	[train - 5/24] MSELoss 2.1674
+	[train - 6/24] MSELoss 2.1455
+	[train - 7/24] MSELoss 2.1635
+	[train - 8/24] MSELoss 2.1328
+	[train - 9/24] MSELoss 2.1331
+	[train - 10/24] MSELoss 2.1276
+	[train - 11/24] MSELoss 2.1296
+	[train - 12/24] MSELoss 2.1241
+	[train - 13/24] MSELoss 2.1262
+	[train - 14/24] MSELoss 2.1378
+	[train - 15/24] MSELoss 2.1308
+	[train - 16/24] MSELoss 2.1301
+	[train - 17/24] MSELoss 2.1221
+	[train - 18/24] MSELoss 2.1151
+	[train - 19/24] MSELoss 2.1068
+	[train - 20/24] MSELoss 2.1022
+	[train - 21/24] MSELoss 2.1098
+	[train - 22/24] MSELoss 2.1007
+	[train - 23/24] MSELoss 2.0883
+	[val - 23/24] MSELoss 2.2609                                 	 Duration: 350.27
+/\ Better loss 2.354342897036323 --> 2.260923597791408 at the end of an epoch * 24 rotations
+Epoch 4/800
+	[train - 0/24] MSELoss 2.1015
+	[train - 1/24] MSELoss 2.0925
+	[train - 2/24] MSELoss 2.0763
+	[train - 3/24] MSELoss 2.0865
+	[train - 4/24] MSELoss 2.0837
+	[train - 5/24] MSELoss 2.0657
+	[train - 6/24] MSELoss 2.0689
+	[train - 7/24] MSELoss 2.0776
+	[train - 8/24] MSELoss 2.0464
+	[train - 9/24] MSELoss 2.0520
+	[train - 10/24] MSELoss 2.0375
+	[train - 11/24] MSELoss 2.0495
+	[train - 12/24] MSELoss 2.0462
+	[train - 13/24] MSELoss 2.0430
+	[train - 14/24] MSELoss 2.0467
+	[train - 15/24] MSELoss 2.0435
+	[train - 16/24] MSELoss 2.0420
+	[train - 17/24] MSELoss 2.0445
+	[train - 18/24] MSELoss 2.0324
+	[train - 19/24] MSELoss 2.0322
+	[train - 20/24] MSELoss 2.0243
+	[train - 21/24] MSELoss 2.0303
+	[train - 22/24] MSELoss 2.0311
+	[train - 23/24] MSELoss 2.0213
+	[val - 23/24] MSELoss 2.2402                                 	 Duration: 349.54
+/\ Better loss 2.260923597791408 --> 2.24016046976351 at the end of an epoch * 24 rotations
+Epoch 5/800
+	[train - 0/24] MSELoss 2.0312
+	[train - 1/24] MSELoss 2.0136
+	[train - 2/24] MSELoss 2.0038
+	[train - 3/24] MSELoss 2.0054
+	[train - 4/24] MSELoss 1.9946
+	[train - 5/24] MSELoss 1.9929
+	[train - 6/24] MSELoss 1.9982
+	[train - 7/24] MSELoss 1.9979
+	[train - 8/24] MSELoss 1.9755
+	[train - 9/24] MSELoss 1.9785
+	[train - 10/24] MSELoss 1.9629
+	[train - 11/24] MSELoss 1.9699
+	[train - 12/24] MSELoss 1.9755
+	[train - 13/24] MSELoss 1.9650
+	[train - 14/24] MSELoss 1.9762
+	[train - 15/24] MSELoss 1.9644
+	[train - 16/24] MSELoss 1.9749
+	[train - 17/24] MSELoss 1.9676
+	[train - 18/24] MSELoss 1.9671
+	[train - 19/24] MSELoss 1.9592
+	[train - 20/24] MSELoss 1.9543
+	[train - 21/24] MSELoss 1.9630
+	[train - 22/24] MSELoss 1.9594
+	[train - 23/24] MSELoss 1.9399
+	[val - 23/24] MSELoss 2.1700                                 	 Duration: 347.92
+/\ Better loss 2.24016046976351 --> 2.1700259243218714 at the end of an epoch * 24 rotations
+Epoch 6/800
+	[train - 0/24] MSELoss 1.9529
+	[train - 1/24] MSELoss 1.9420
+	[train - 2/24] MSELoss 1.9218
+	[train - 3/24] MSELoss 1.9292
+	[train - 4/24] MSELoss 1.9352
+	[train - 5/24] MSELoss 1.9214
+	[train - 6/24] MSELoss 1.9159
+	[train - 7/24] MSELoss 1.9162
+	[train - 8/24] MSELoss 1.9005
+	[train - 9/24] MSELoss 1.9070
+	[train - 10/24] MSELoss 1.8876
+	[train - 11/24] MSELoss 1.9086
+	[train - 12/24] MSELoss 1.8959
+	[train - 13/24] MSELoss 1.8935
+	[train - 14/24] MSELoss 1.8999
+	[train - 15/24] MSELoss 1.8976
+	[train - 16/24] MSELoss 1.9011
+	[train - 17/24] MSELoss 1.8913
+	[train - 18/24] MSELoss 1.8928
+	[train - 19/24] MSELoss 1.8858
+	[train - 20/24] MSELoss 1.8830
+	[train - 21/24] MSELoss 1.8851
+	[train - 22/24] MSELoss 1.8857
+	[train - 23/24] MSELoss 1.8807
+	[val - 23/24] MSELoss 2.1601                                 	 Duration: 349.78
+/\ Better loss 2.1700259243218714 --> 2.160059136129995 at the end of an epoch * 24 rotations
+Epoch 7/800
+	[train - 0/24] MSELoss 1.8844
+	[train - 1/24] MSELoss 1.8577
+	[train - 2/24] MSELoss 1.8406
+	[train - 3/24] MSELoss 1.8560
+	[train - 4/24] MSELoss 1.8632
+	[train - 5/24] MSELoss 1.8408
+	[train - 6/24] MSELoss 1.8548
+	[train - 7/24] MSELoss 1.8491
+	[train - 8/24] MSELoss 1.8292
+	[train - 9/24] MSELoss 1.8286
+	[train - 10/24] MSELoss 1.8151
+	[train - 11/24] MSELoss 1.8201
+	[train - 12/24] MSELoss 1.8221
+	[train - 13/24] MSELoss 1.8174
+	[train - 14/24] MSELoss 1.8230
+	[train - 15/24] MSELoss 1.8279
+	[train - 16/24] MSELoss 1.8279
+	[train - 17/24] MSELoss 1.8163
+	[train - 18/24] MSELoss 1.8166
+	[train - 19/24] MSELoss 1.8215
+	[train - 20/24] MSELoss 1.8157
+	[train - 21/24] MSELoss 1.8148
+	[train - 22/24] MSELoss 1.8127
+	[train - 23/24] MSELoss 1.8022
+	[val - 23/24] MSELoss 2.4439                                 	 Duration: 349.34
+Epoch 8/800
+	[train - 0/24] MSELoss 1.8027
+	[train - 1/24] MSELoss 1.7878
+	[train - 2/24] MSELoss 1.7741
+	[train - 3/24] MSELoss 1.7840
+	[train - 4/24] MSELoss 1.7938
+	[train - 5/24] MSELoss 1.7696
+	[train - 6/24] MSELoss 1.7822
+	[train - 7/24] MSELoss 1.7776
+	[train - 8/24] MSELoss 1.7663
+	[train - 9/24] MSELoss 1.7604
+	[train - 10/24] MSELoss 1.7450
+	[train - 11/24] MSELoss 1.7512
+	[train - 12/24] MSELoss 1.7543
+	[train - 13/24] MSELoss 1.7472
+	[train - 14/24] MSELoss 1.7543
+	[train - 15/24] MSELoss 1.7508
+	[train - 16/24] MSELoss 1.7494
+	[train - 17/24] MSELoss 1.7484
+	[train - 18/24] MSELoss 1.7583
+	[train - 19/24] MSELoss 1.7508
+	[train - 20/24] MSELoss 1.7452
+	[train - 21/24] MSELoss 1.7499
+	[train - 22/24] MSELoss 1.7425
+	[train - 23/24] MSELoss 1.7361
+	[val - 23/24] MSELoss 2.2332                                 	 Duration: 349.37
+Epoch 9/800
+	[train - 0/24] MSELoss 1.7369
+	[train - 1/24] MSELoss 1.7121
+	[train - 2/24] MSELoss 1.6879
+	[train - 3/24] MSELoss 1.7040
+	[train - 4/24] MSELoss 1.7036
+	[train - 5/24] MSELoss 1.7037
+	[train - 6/24] MSELoss 1.6996
+	[train - 7/24] MSELoss 1.7094
+	[train - 8/24] MSELoss 1.6889
+	[train - 9/24] MSELoss 1.6864
+	[train - 10/24] MSELoss 1.6656
+	[train - 11/24] MSELoss 1.6964
+	[train - 12/24] MSELoss 1.6812
+	[train - 13/24] MSELoss 1.6769
+	[train - 14/24] MSELoss 1.6809
+	[train - 15/24] MSELoss 1.6739
+	[train - 16/24] MSELoss 1.6786
+	[train - 17/24] MSELoss 1.6827
+	[train - 18/24] MSELoss 1.6730
+	[train - 19/24] MSELoss 1.6687
+	[train - 20/24] MSELoss 1.6704
+	[train - 21/24] MSELoss 1.6654
+	[train - 22/24] MSELoss 1.6586
+	[train - 23/24] MSELoss 1.6650
+	[val - 23/24] MSELoss 2.3041                                 	 Duration: 351.02
+Epoch 10/800
+	[train - 0/24] MSELoss 1.6621
+	[train - 1/24] MSELoss 1.6339
+	[train - 2/24] MSELoss 1.6248
+	[train - 3/24] MSELoss 1.6326
+	[train - 4/24] MSELoss 1.6513
+	[train - 5/24] MSELoss 1.6294
+	[train - 6/24] MSELoss 1.6388
+	[train - 7/24] MSELoss 1.6244
+	[train - 8/24] MSELoss 1.6089
+	[train - 9/24] MSELoss 1.6100
+	[train - 10/24] MSELoss 1.5809
+	[train - 11/24] MSELoss 1.6195
+	[train - 12/24] MSELoss 1.6062
+	[train - 13/24] MSELoss 1.6053
+	[train - 14/24] MSELoss 1.6127
+	[train - 15/24] MSELoss 1.6014
+	[train - 16/24] MSELoss 1.6113
+	[train - 17/24] MSELoss 1.6004
+	[train - 18/24] MSELoss 1.6012
+	[train - 19/24] MSELoss 1.5905
+	[train - 20/24] MSELoss 1.5976
+	[train - 21/24] MSELoss 1.5950
+	[train - 22/24] MSELoss 1.6007
+	[train - 23/24] MSELoss 1.5901
+	[val - 23/24] MSELoss 2.1911                                 	 Duration: 350.95
+Epoch 11/800
+	[train - 0/24] MSELoss 1.5838
+	[train - 1/24] MSELoss 1.5669
+	[train - 2/24] MSELoss 1.5565
+	[train - 3/24] MSELoss 1.5490
+	[train - 4/24] MSELoss 1.5660
+	[train - 5/24] MSELoss 1.5486
+	[train - 6/24] MSELoss 1.5567
+	[train - 7/24] MSELoss 1.5597
+	[train - 8/24] MSELoss 1.5449
+	[train - 9/24] MSELoss 1.5374
+	[train - 10/24] MSELoss 1.5184
+	[train - 11/24] MSELoss 1.5430
+	[train - 12/24] MSELoss 1.5243
+	[train - 13/24] MSELoss 1.5241
+	[train - 14/24] MSELoss 1.5421
+	[train - 15/24] MSELoss 1.5195
+	[train - 16/24] MSELoss 1.5339
+	[train - 17/24] MSELoss 1.5335
+	[train - 18/24] MSELoss 1.5296
+	[train - 19/24] MSELoss 1.5145
+	[train - 20/24] MSELoss 1.5303
+	[train - 21/24] MSELoss 1.5146
+	[train - 22/24] MSELoss 1.5307
+	[train - 23/24] MSELoss 1.5097
+	[val - 23/24] MSELoss 2.1931                                 	 Duration: 350.50
+Epoch 12/800
+	[train - 0/24] MSELoss 1.5087
+	[train - 1/24] MSELoss 1.4865
+	[train - 2/24] MSELoss 1.4749
+	[train - 3/24] MSELoss 1.4739
+	[train - 4/24] MSELoss 1.4853
+	[train - 5/24] MSELoss 1.4777
+	[train - 6/24] MSELoss 1.4902
+	[train - 7/24] MSELoss 1.4665
+	[train - 8/24] MSELoss 1.4757
+	[train - 9/24] MSELoss 1.4701
+	[train - 10/24] MSELoss 1.4335
+	[train - 11/24] MSELoss 1.4639
+	[train - 12/24] MSELoss 1.4575
+	[train - 13/24] MSELoss 1.4463
+	[train - 14/24] MSELoss 1.4614
+	[train - 15/24] MSELoss 1.4496
+	[train - 16/24] MSELoss 1.4667
+	[train - 17/24] MSELoss 1.4542
+	[train - 18/24] MSELoss 1.4541
+	[train - 19/24] MSELoss 1.4544
+	[train - 20/24] MSELoss 1.4463
+	[train - 21/24] MSELoss 1.4371
+	[train - 22/24] MSELoss 1.4517
+	[train - 23/24] MSELoss 1.4336
+	[val - 23/24] MSELoss 2.4606                                 	 Duration: 350.30
+Epoch 13/800
+	[train - 0/24] MSELoss 1.4364
+	[train - 1/24] MSELoss 1.4129
+	[train - 2/24] MSELoss 1.4057
+	[train - 3/24] MSELoss 1.3977
+	[train - 4/24] MSELoss 1.4109
+	[train - 5/24] MSELoss 1.4000
+	[train - 6/24] MSELoss 1.4072
+	[train - 7/24] MSELoss 1.3993
+	[train - 8/24] MSELoss 1.3949
+	[train - 9/24] MSELoss 1.3882
+	[train - 10/24] MSELoss 1.3625
+	[train - 11/24] MSELoss 1.3905
+	[train - 12/24] MSELoss 1.3720
+	[train - 13/24] MSELoss 1.3704
+	[train - 14/24] MSELoss 1.3842
+	[train - 15/24] MSELoss 1.3796
+	[train - 16/24] MSELoss 1.3817
+	[train - 17/24] MSELoss 1.3792
+	[train - 18/24] MSELoss 1.3763
+	[train - 19/24] MSELoss 1.3693
+	[train - 20/24] MSELoss 1.3762
+	[train - 21/24] MSELoss 1.3719
+	[train - 22/24] MSELoss 1.3710
+	[train - 23/24] MSELoss 1.3566
+	[val - 23/24] MSELoss 2.2651                                 	 Duration: 349.67
+Epoch 14/800
+	[train - 0/24] MSELoss 1.3598
+	[train - 1/24] MSELoss 1.3397
+	[train - 2/24] MSELoss 1.3294
+	[train - 3/24] MSELoss 1.3231
+	[train - 4/24] MSELoss 1.3307
+	[train - 5/24] MSELoss 1.3290
+	[train - 6/24] MSELoss 1.3289
+	[train - 7/24] MSELoss 1.3192
+	[train - 8/24] MSELoss 1.3205
+	[train - 9/24] MSELoss 1.3115
+	[train - 10/24] MSELoss 1.2957
+	[train - 11/24] MSELoss 1.3067
+	[train - 12/24] MSELoss 1.2948
+	[train - 13/24] MSELoss 1.3067
+	[train - 14/24] MSELoss 1.3051
+	[train - 15/24] MSELoss 1.3003
+	[train - 16/24] MSELoss 1.3054
+	[train - 17/24] MSELoss 1.2961
+	[train - 18/24] MSELoss 1.2937
+	[train - 19/24] MSELoss 1.2914
+	[train - 20/24] MSELoss 1.3014
+	[train - 21/24] MSELoss 1.3064
+	[train - 22/24] MSELoss 1.2852
+	[train - 23/24] MSELoss 1.2812
+	[val - 23/24] MSELoss 2.5272                                 	 Duration: 349.37
+Epoch 15/800
+	[train - 0/24] MSELoss 1.2849
+	[train - 1/24] MSELoss 1.2672
+	[train - 2/24] MSELoss 1.2532
+	[train - 3/24] MSELoss 1.2461
+	[train - 4/24] MSELoss 1.2586
+	[train - 5/24] MSELoss 1.2557
+	[train - 6/24] MSELoss 1.2521
+	[train - 7/24] MSELoss 1.2490
+	[train - 8/24] MSELoss 1.2446
+	[train - 9/24] MSELoss 1.2345
+	[train - 10/24] MSELoss 1.2085
+	[train - 11/24] MSELoss 1.2366
+	[train - 12/24] MSELoss 1.2212
+	[train - 13/24] MSELoss 1.2191
+	[train - 14/24] MSELoss 1.2218
+	[train - 15/24] MSELoss 1.2216
+	[train - 16/24] MSELoss 1.2363
+	[train - 17/24] MSELoss 1.2251
+	[train - 18/24] MSELoss 1.2248
+	[train - 19/24] MSELoss 1.2163
+	[train - 20/24] MSELoss 1.2204
+	[train - 21/24] MSELoss 1.2062
+	[train - 22/24] MSELoss 1.2237
+	[train - 23/24] MSELoss 1.2036
+	[val - 23/24] MSELoss 3.4006                                 	 Duration: 349.97
+Epoch 16/800
+	[train - 0/24] MSELoss 1.2099
+	[train - 1/24] MSELoss 1.1857
+	[train - 2/24] MSELoss 1.1730
+	[train - 3/24] MSELoss 1.1807
+	[train - 4/24] MSELoss 1.1870
+	[train - 5/24] MSELoss 1.1796
+	[train - 6/24] MSELoss 1.1695
+	[train - 7/24] MSELoss 1.1683
+	[train - 8/24] MSELoss 1.1765
+	[train - 9/24] MSELoss 1.1704
+	[train - 10/24] MSELoss 1.1516
+	[train - 11/24] MSELoss 1.1543
+	[train - 12/24] MSELoss 1.1577
+	[train - 13/24] MSELoss 1.1483
+	[train - 14/24] MSELoss 1.1536
+	[train - 15/24] MSELoss 1.1436
+	[train - 16/24] MSELoss 1.1602
+	[train - 17/24] MSELoss 1.1433
+	[train - 18/24] MSELoss 1.1493
+	[train - 19/24] MSELoss 1.1415
+	[train - 20/24] MSELoss 1.1510
+	[train - 21/24] MSELoss 1.1334
+	[train - 22/24] MSELoss 1.1446
+	[train - 23/24] MSELoss 1.1351
+	[val - 23/24] MSELoss 3.1283                                 	 Duration: 351.07
+Epoch 17/800
+	[train - 0/24] MSELoss 1.1350
+	[train - 1/24] MSELoss 1.1075
+	[train - 2/24] MSELoss 1.1044
+	[train - 3/24] MSELoss 1.1069
+	[train - 4/24] MSELoss 1.1053
+	[train - 5/24] MSELoss 1.1015
+	[train - 6/24] MSELoss 1.1011
+	[train - 7/24] MSELoss 1.0969
+	[train - 8/24] MSELoss 1.0962
+	[train - 9/24] MSELoss 1.0923
+	[train - 10/24] MSELoss 1.0697
+	[train - 11/24] MSELoss 1.0921
+	[train - 12/24] MSELoss 1.0789
+	[train - 13/24] MSELoss 1.0734
+	[train - 14/24] MSELoss 1.0797
+	[train - 15/24] MSELoss 1.0788
+	[train - 16/24] MSELoss 1.0673
+	[train - 17/24] MSELoss 1.0718
+	[train - 18/24] MSELoss 1.0649
+	[train - 19/24] MSELoss 1.0784
+	[train - 20/24] MSELoss 1.0676
+	[train - 21/24] MSELoss 1.0697
+	[train - 22/24] MSELoss 1.0773
+	[train - 23/24] MSELoss 1.0603
+	[val - 23/24] MSELoss 2.4436                                 	 Duration: 352.00
+Epoch 18/800
+	[train - 0/24] MSELoss 1.0606
+	[train - 1/24] MSELoss 1.0493
+	[train - 2/24] MSELoss 1.0303
+	[train - 3/24] MSELoss 1.0327
+	[train - 4/24] MSELoss 1.0493
+	[train - 5/24] MSELoss 1.0335
+	[train - 6/24] MSELoss 1.0258
+	[train - 7/24] MSELoss 1.0288
+	[train - 8/24] MSELoss 1.0278
+	[train - 9/24] MSELoss 1.0236
+	[train - 10/24] MSELoss 0.9935
+	[train - 11/24] MSELoss 1.0203
+	[train - 12/24] MSELoss 1.0009
+	[train - 13/24] MSELoss 1.0009
+	[train - 14/24] MSELoss 1.0090
+	[train - 15/24] MSELoss 0.9985
+	[train - 16/24] MSELoss 1.0127
+	[train - 17/24] MSELoss 0.9998
+	[train - 18/24] MSELoss 1.0026
+	[train - 19/24] MSELoss 1.0051
+	[train - 20/24] MSELoss 0.9943
+	[train - 21/24] MSELoss 0.9935
+	[train - 22/24] MSELoss 0.9906
+	[train - 23/24] MSELoss 0.9939
+	[val - 23/24] MSELoss 2.3970                                 	 Duration: 351.38
+Epoch 19/800
+	[train - 0/24] MSELoss 0.9919
+	[train - 1/24] MSELoss 0.9760
+	[train - 2/24] MSELoss 0.9577
+	[train - 3/24] MSELoss 0.9560
+	[train - 4/24] MSELoss 0.9675
+	[train - 5/24] MSELoss 0.9599
+	[train - 6/24] MSELoss 0.9597
+	[train - 7/24] MSELoss 0.9568
+	[train - 8/24] MSELoss 0.9512
+	[train - 9/24] MSELoss 0.9469
+	[train - 10/24] MSELoss 0.9306
+	[train - 11/24] MSELoss 0.9465
+	[train - 12/24] MSELoss 0.9305
+	[train - 13/24] MSELoss 0.9301
+	[train - 14/24] MSELoss 0.9449
+	[train - 15/24] MSELoss 0.9287
+	[train - 16/24] MSELoss 0.9433
+	[train - 17/24] MSELoss 0.9365
+	[train - 18/24] MSELoss 0.9284
+	[train - 19/24] MSELoss 0.9336
+	[train - 20/24] MSELoss 0.9321
+	[train - 21/24] MSELoss 0.9268
+	[train - 22/24] MSELoss 0.9232
+	[train - 23/24] MSELoss 0.9173
+	[val - 23/24] MSELoss 2.4408                                 	 Duration: 352.61
+Epoch 20/800
+	[train - 0/24] MSELoss 0.9313
+	[train - 1/24] MSELoss 0.8939
+	[train - 2/24] MSELoss 0.8855
+	[train - 3/24] MSELoss 0.8805
+	[train - 4/24] MSELoss 0.9063
+	[train - 5/24] MSELoss 0.8963
+	[train - 6/24] MSELoss 0.8890
+	[train - 7/24] MSELoss 0.8888
+	[train - 8/24] MSELoss 0.8851
+	[train - 9/24] MSELoss 0.8744
+	[train - 10/24] MSELoss 0.8552
+	[train - 11/24] MSELoss 0.8781
+	[train - 12/24] MSELoss 0.8602
+	[train - 13/24] MSELoss 0.8614
+	[train - 14/24] MSELoss 0.8741
+	[train - 15/24] MSELoss 0.8680
+	[train - 16/24] MSELoss 0.8773
+	[train - 17/24] MSELoss 0.8664
+	[train - 18/24] MSELoss 0.8610
+	[train - 19/24] MSELoss 0.8573
+	[train - 20/24] MSELoss 0.8698
+	[train - 21/24] MSELoss 0.8499
+	[train - 22/24] MSELoss 0.8594
+	[train - 23/24] MSELoss 0.8535
+	[val - 23/24] MSELoss 2.5261                                 	 Duration: 349.27
+Epoch 21/800
+	[train - 0/24] MSELoss 0.8601
+	[train - 1/24] MSELoss 0.8344
+	[train - 2/24] MSELoss 0.8323
+	[train - 3/24] MSELoss 0.8192
+	[train - 4/24] MSELoss 0.8306
+	[train - 5/24] MSELoss 0.8364
+	[train - 6/24] MSELoss 0.8206
+	[train - 7/24] MSELoss 0.8246
+	[train - 8/24] MSELoss 0.8226
+	[train - 9/24] MSELoss 0.8117
+	[train - 10/24] MSELoss 0.7880
+	[train - 11/24] MSELoss 0.8112
+	[train - 12/24] MSELoss 0.8007
+	[train - 13/24] MSELoss 0.7971
+	[train - 14/24] MSELoss 0.8100
+	[train - 15/24] MSELoss 0.7931
+	[train - 16/24] MSELoss 0.8152
+	[train - 17/24] MSELoss 0.8036
+	[train - 18/24] MSELoss 0.8004
+	[train - 19/24] MSELoss 0.7998
+	[train - 20/24] MSELoss 0.7998
+	[train - 21/24] MSELoss 0.7777
+	[train - 22/24] MSELoss 0.7832
+	[train - 23/24] MSELoss 0.7923
+	[val - 23/24] MSELoss 2.8152                                 	 Duration: 352.97
+Epoch 22/800
+	[train - 0/24] MSELoss 0.7969
+	[train - 1/24] MSELoss 0.7679
+	[train - 2/24] MSELoss 0.7645
+	[train - 3/24] MSELoss 0.7601
+	[train - 4/24] MSELoss 0.7609
+	[train - 5/24] MSELoss 0.7682
+	[train - 6/24] MSELoss 0.7605
+	[train - 7/24] MSELoss 0.7641
+	[train - 8/24] MSELoss 0.7595
+	[train - 9/24] MSELoss 0.7533
+	[train - 10/24] MSELoss 0.7436
+	[train - 11/24] MSELoss 0.7518
+	[train - 12/24] MSELoss 0.7349
+	[train - 13/24] MSELoss 0.7301
+	[train - 14/24] MSELoss 0.7428
+	[train - 15/24] MSELoss 0.7394
+	[train - 16/24] MSELoss 0.7457
+	[train - 17/24] MSELoss 0.7408
+	[train - 18/24] MSELoss 0.7395
+	[train - 19/24] MSELoss 0.7434
+	[train - 20/24] MSELoss 0.7330
+	[train - 21/24] MSELoss 0.7293
+	[train - 22/24] MSELoss 0.7301
+	[train - 23/24] MSELoss 0.7280
+	[val - 23/24] MSELoss 2.5801                                 	 Duration: 351.98
+Epoch 23/800
+	[train - 0/24] MSELoss 0.7347
+	[train - 1/24] MSELoss 0.7061
+	[train - 2/24] MSELoss 0.7001
+	[train - 3/24] MSELoss 0.6862
+	[train - 4/24] MSELoss 0.7072
+	[train - 5/24] MSELoss 0.7082
+	[train - 6/24] MSELoss 0.6986
+	[train - 7/24] MSELoss 0.6989
+	[train - 8/24] MSELoss 0.7044
+	[train - 9/24] MSELoss 0.6952
+	[train - 10/24] MSELoss 0.6756
+	[train - 11/24] MSELoss 0.6894
+	[train - 12/24] MSELoss 0.6821
+	[train - 13/24] MSELoss 0.6832
+	[train - 14/24] MSELoss 0.6880
+	[train - 15/24] MSELoss 0.6806
+	[train - 16/24] MSELoss 0.6941
+	[train - 17/24] MSELoss 0.6813
+	[train - 18/24] MSELoss 0.6830
+	[train - 19/24] MSELoss 0.6872
+	[train - 20/24] MSELoss 0.6774
+	[train - 21/24] MSELoss 0.6685
+	[train - 22/24] MSELoss 0.6737
+	[train - 23/24] MSELoss 0.6700
+	[val - 23/24] MSELoss 2.5895                                 	 Duration: 351.56
+Epoch 24/800
+	[train - 0/24] MSELoss 0.6780
+	[train - 1/24] MSELoss 0.6450
+	[train - 2/24] MSELoss 0.6521
+	[train - 3/24] MSELoss 0.6314
+	[train - 4/24] MSELoss 0.6492
+	[train - 5/24] MSELoss 0.6639
+	[train - 6/24] MSELoss 0.6464
+	[train - 7/24] MSELoss 0.6460
+	[train - 8/24] MSELoss 0.6454
+	[train - 9/24] MSELoss 0.6351
+	[train - 10/24] MSELoss 0.6250
+	[train - 11/24] MSELoss 0.6427
+	[train - 12/24] MSELoss 0.6202
+	[train - 13/24] MSELoss 0.6271
+	[train - 14/24] MSELoss 0.6286
+	[train - 15/24] MSELoss 0.6163
+	[train - 16/24] MSELoss 0.6389
+	[train - 17/24] MSELoss 0.6322
+	[train - 18/24] MSELoss 0.6234
+	[train - 19/24] MSELoss 0.6299
+	[train - 20/24] MSELoss 0.6257
+	[train - 21/24] MSELoss 0.6094
+	[train - 22/24] MSELoss 0.6121
+	[train - 23/24] MSELoss 0.6146
+	[val - 23/24] MSELoss 2.7212                                 	 Duration: 350.76
+Epoch 25/800
+	[train - 0/24] MSELoss 0.6274
+	[train - 1/24] MSELoss 0.5971
+	[train - 2/24] MSELoss 0.5917
+	[train - 3/24] MSELoss 0.5853
+	[train - 4/24] MSELoss 0.5941
+	[train - 5/24] MSELoss 0.5996
+	[train - 6/24] MSELoss 0.5905
+	[train - 7/24] MSELoss 0.5910
+	[train - 8/24] MSELoss 0.5894
+	[train - 9/24] MSELoss 0.5836
+	[train - 10/24] MSELoss 0.5721
+	[train - 11/24] MSELoss 0.5771
+	[train - 12/24] MSELoss 0.5632
+	[train - 13/24] MSELoss 0.5720
+	[train - 14/24] MSELoss 0.5833
+	[train - 15/24] MSELoss 0.5658
+	[train - 16/24] MSELoss 0.5773
+	[train - 17/24] MSELoss 0.5833
+	[train - 18/24] MSELoss 0.5781
+	[train - 19/24] MSELoss 0.5697
+	[train - 20/24] MSELoss 0.5751
+	[train - 21/24] MSELoss 0.5590
+	[train - 22/24] MSELoss 0.5630
+	[train - 23/24] MSELoss 0.5660
+	[val - 23/24] MSELoss 2.5653                                 	 Duration: 351.92
+Epoch 26/800
+	[train - 0/24] MSELoss 0.5695
+	[train - 1/24] MSELoss 0.5492
+	[train - 2/24] MSELoss 0.5450
+	[train - 3/24] MSELoss 0.5348
+	[train - 4/24] MSELoss 0.5405
+	[train - 5/24] MSELoss 0.5556
+	[train - 6/24] MSELoss 0.5418
+	[train - 7/24] MSELoss 0.5454
+	[train - 8/24] MSELoss 0.5396
+	[train - 9/24] MSELoss 0.5400
+	[train - 10/24] MSELoss 0.5285
+	[train - 11/24] MSELoss 0.5305
+	[train - 12/24] MSELoss 0.5263
+	[train - 13/24] MSELoss 0.5241
+	[train - 14/24] MSELoss 0.5325
+	[train - 15/24] MSELoss 0.5238
+	[train - 16/24] MSELoss 0.5412
+	[train - 17/24] MSELoss 0.5254
+	[train - 18/24] MSELoss 0.5293
+	[train - 19/24] MSELoss 0.5214
+	[train - 20/24] MSELoss 0.5227
+	[train - 21/24] MSELoss 0.5191
+	[train - 22/24] MSELoss 0.5120
+	[train - 23/24] MSELoss 0.5125
+	[val - 23/24] MSELoss 2.8346                                 	 Duration: 351.48
+Epoch 27/800
+	[train - 0/24] MSELoss 0.5239
+	[train - 1/24] MSELoss 0.4986
+	[train - 2/24] MSELoss 0.4916
+	[train - 3/24] MSELoss 0.4866
+	[train - 4/24] MSELoss 0.4968
+	[train - 5/24] MSELoss 0.4987
+	[train - 6/24] MSELoss 0.4993
+	[train - 7/24] MSELoss 0.5015
+	[train - 8/24] MSELoss 0.4941
+	[train - 9/24] MSELoss 0.4916
+	[train - 10/24] MSELoss 0.4697
+	[train - 11/24] MSELoss 0.4877
+	[train - 12/24] MSELoss 0.4746
+	[train - 13/24] MSELoss 0.4798
+	[train - 14/24] MSELoss 0.4872
+	[train - 15/24] MSELoss 0.4739
+	[train - 16/24] MSELoss 0.4850
+	[train - 17/24] MSELoss 0.4782
+	[train - 18/24] MSELoss 0.4897
+	[train - 19/24] MSELoss 0.4765
+	[train - 20/24] MSELoss 0.4732
+	[train - 21/24] MSELoss 0.4728
+	[train - 22/24] MSELoss 0.4723
+	[train - 23/24] MSELoss 0.4664
+	[val - 23/24] MSELoss 2.6595                                 	 Duration: 337.56
+----------- Early stopping activated !
+[27 / 800] Best mean MSE: 2.1601 at 5 epoch.            
+	Total duration: 02:37:37
+test dataset with 285 samples
+	Partial charge normalization: m= -0.1401471346616745                     std= 0.4216829240322113
+
+--------------------- Running test
+	[Test] MSELoss 2.2561
+--------------------- Running predict
+Computed preds on 285/285 samples! (expected: 285)
+
+    Analysis:
+        rmse= 1.502042773590553
+        mae= 1.2153267308285363
+        corr= (0.7532754574538436, 1.9971002802792252e-53)
+    
+[TEST] rmse: 1.5020 mae: 1.2153 corr: (0.7532754574538436, 1.9971002802792252e-53)
+	saving model /gpfsscratch/rech/luh/uqu41fu/models/densenucy_rotations/densenucy_systematic_data_augmentation_CoG12_6_1.5020.pth
+Thu Jul 13 12:18:35 CEST 2023

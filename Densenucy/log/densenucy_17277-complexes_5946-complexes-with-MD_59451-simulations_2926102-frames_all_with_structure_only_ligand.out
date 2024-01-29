@@ -1,0 +1,26 @@
+Tue Aug 29 13:52:23 CEST 2023
+Training with 1 gpu !
+training dataset with 2340730 samples
+	Partial charge normalization: m= -0.12426730245351791                     std= 0.4301050901412964
+
+	loading model /gpfsscratch/rech/luh/uqu41fu/models/densenucy/densenucy_17277-complexes_5946-complexes-with-MD_59451-simulations_2926102-frames_all_with_structure_only_ligand_7.pth
+Model successfully loaded
+test dataset with 41099 samples
+	Partial charge normalization: m= -0.12426730245351791                     std= 0.4301050901412964
+
+--------------------- Running test
+	[Test] MSELoss 2.6196
+--------------------- Running predict
+Computed preds on 41099/41099 samples! (expected: 41099)
+
+    Analysis:
+        rmse= 1.6185065027129648
+        mae= 1.2180914554796898
+        corr= (0.7455242432213453, 0.0)
+    
+[TEST] rmse: 1.6185 mae: 1.2181 corr: (0.7455242432213453, 0.0)
+1438550528
+--
+GPU usage on GPU 0: 1.3GiB
+--
+Wed Aug 30 00:21:57 CEST 2023

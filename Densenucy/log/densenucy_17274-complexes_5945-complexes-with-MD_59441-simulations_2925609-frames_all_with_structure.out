@@ -1,0 +1,173 @@
+Thu Aug 10 10:34:33 CEST 2023
+Training with 1 gpu !
+training dataset with 2340237 samples
+	Partial charge normalization: m= -0.1904931366443634                     std= 0.4524168372154236
+
+validation dataset with 585372 samples
+	Partial charge normalization: m= -0.1904931366443634                     std= 0.4524168372154236
+
+Number of available rotations: 24
+	loading model /gpfsscratch/rech/luh/uqu41fu/models/densenucy/densenucy_27_1.7369.pth
+Model successfully loaded
+pretrained model: epoch 27 with MSELoss 1.7369
+Epoch 1/200
+Phase: train 
+	[train] MSELoss 0.0393
+Phase: val 
+	[val] MSELoss 1.8533 	 Duration: 1672.75
+Epoch 2/200
+Phase: train 
+	[train] MSELoss 0.0392
+Phase: val 
+	[val] MSELoss 1.7610 	 Duration: 1669.00
+Epoch 3/200
+Phase: train 
+	[train] MSELoss 0.0390
+Phase: val 
+	[val] MSELoss 1.7585 	 Duration: 1656.75
+Epoch 4/200
+Phase: train 
+	[train] MSELoss 0.0388
+Phase: val 
+	[val] MSELoss 1.7331 	 Duration: 1642.11
+/\ Better loss 1.7369 --> 1.7330544721988752
+	saving model /gpfsscratch/rech/luh/uqu41fu/models/densenucy/densenucy_3_1.7331.pth on rank 0
+Epoch 5/200
+Phase: train 
+	[train] MSELoss 0.0386
+Phase: val 
+	[val] MSELoss 1.7320 	 Duration: 1653.49
+/\ Better loss 1.7330544721988752 --> 1.7319670226795951
+	saving model /gpfsscratch/rech/luh/uqu41fu/models/densenucy/densenucy_4_1.7320.pth on rank 0
+Epoch 6/200
+Phase: train 
+	[train] MSELoss 0.0384
+Phase: val 
+	[val] MSELoss 1.7878 	 Duration: 1659.26
+Epoch 7/200
+Phase: train 
+	[train] MSELoss 0.0382
+Phase: val 
+	[val] MSELoss 1.7526 	 Duration: 1655.21
+Epoch 8/200
+Phase: train 
+	[train] MSELoss 0.0381
+Phase: val 
+	[val] MSELoss 1.8218 	 Duration: 1660.43
+Epoch 9/200
+Phase: train 
+	[train] MSELoss 0.0379
+Phase: val 
+	[val] MSELoss 1.8130 	 Duration: 1658.77
+Epoch 10/200
+Phase: train 
+	[train] MSELoss 0.0377
+Phase: val 
+	[val] MSELoss 1.8075 	 Duration: 1663.16
+Epoch 11/200
+Phase: train 
+	[train] MSELoss 0.0376
+Phase: val 
+	[val] MSELoss 1.8030 	 Duration: 1662.03
+Epoch 12/200
+Phase: train 
+	[train] MSELoss 0.0374
+Phase: val 
+	[val] MSELoss 1.8838 	 Duration: 1670.20
+Epoch 13/200
+Phase: train 
+	[train] MSELoss 0.0373
+Phase: val 
+	[val] MSELoss 1.7541 	 Duration: 1656.54
+Epoch 14/200
+Phase: train 
+	[train] MSELoss 0.0371
+Phase: val 
+	[val] MSELoss 1.8861 	 Duration: 1663.95
+Epoch 15/200
+Phase: train 
+	[train] MSELoss 0.0369
+Phase: val 
+	[val] MSELoss 1.8140 	 Duration: 1657.97
+Epoch 16/200
+Phase: train 
+	[train] MSELoss 0.0368
+Phase: val 
+	[val] MSELoss 1.8225 	 Duration: 1648.53
+Epoch 17/200
+Phase: train 
+	[train] MSELoss 0.0368
+Phase: val 
+	[val] MSELoss 1.9261 	 Duration: 1655.89
+Epoch 18/200
+Phase: train 
+	[train] MSELoss 0.0365
+Phase: val 
+	[val] MSELoss 1.8098 	 Duration: 1647.41
+Epoch 19/200
+Phase: train 
+	[train] MSELoss 0.0363
+Phase: val 
+	[val] MSELoss 1.8723 	 Duration: 1657.13
+Epoch 20/200
+Phase: train 
+	[train] MSELoss 0.0362
+Phase: val 
+	[val] MSELoss 1.8837 	 Duration: 1656.83
+Epoch 21/200
+Phase: train 
+	[train] MSELoss 0.0361
+Phase: val 
+	[val] MSELoss 1.9432 	 Duration: 1654.76
+Epoch 22/200
+Phase: train 
+	[train] MSELoss 0.0359
+Phase: val 
+	[val] MSELoss 2.0211 	 Duration: 1650.78
+Epoch 23/200
+Phase: train 
+	[train] MSELoss 0.0359
+Phase: val 
+	[val] MSELoss 2.0297 	 Duration: 1656.82
+Epoch 24/200
+Phase: train 
+	[train] MSELoss 0.0357
+Phase: val 
+	[val] MSELoss 2.1453 	 Duration: 1646.89
+Epoch 25/200
+Phase: train 
+	[train] MSELoss 0.0355
+Phase: val 
+	[val] MSELoss 2.2765 	 Duration: 1657.34
+Epoch 26/200
+Phase: train 
+	[train] MSELoss 0.0354
+Phase: val 
+	[val] MSELoss 2.2486 	 Duration: 1667.28
+----------- Early stopping activated !
+
+
+_____________________________________________
+[26 / 200] Best mean MSE: 1.7320 at epoch 4             
+	Total duration: 11:58:21
+_____________________________________________
+test dataset with 285 samples
+	Partial charge normalization: m= -0.1904931366443634                     std= 0.4524168372154236
+
+--------------------- Running test
+	[Test] MSELoss 1.6316
+--------------------- Running predict
+Computed preds on 285/285 samples! (expected: 285)
+
+    Analysis:
+        rmse= 1.2773481436314245
+        mae= 1.0252564371677868
+        corr= (0.8255758566364563, 2.71402847278322e-72)
+    
+[TEST] rmse: 1.2773 mae: 1.0253 corr: (0.8255758566364563, 2.71402847278322e-72)
+	saving model /gpfsscratch/rech/luh/uqu41fu/models/densenucy/densenucy_17274-complexes_5945-complexes-with-MD_59441-simulations_2925609-frames_all_with_structure_5.pth on rank 0
+756673024
+--
+GPU usage on GPU 0: 721.6MiB
+--
+Fri Aug 11 03:42:54 CEST 2023

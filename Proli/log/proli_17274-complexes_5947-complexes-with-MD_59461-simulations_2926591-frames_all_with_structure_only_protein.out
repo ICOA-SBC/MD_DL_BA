@@ -1,0 +1,60 @@
+Sat Aug 26 12:45:21 CEST 2023
+mlflow:
+  path: ${env:luh_CCFRSCRATCH}/mlruns
+  run_name: 17274-complexes_5947-complexes-with-MD_59461-simulations_2926591-frames_all_with_structure_only_protein_1
+io:
+  input_dir: /gpfswork/rech/luh/commun/deep_learning/pafnucy/data/data_augmentation_all_3M_with_structural_only_protein
+  model_path: ${env:luh_CCFRSCRATCH}/models/proli
+  specific_test_dir: /gpfswork/rech/luh/commun/deep_learning/pafnucy/data/data_augmentation_all_3M_with_structural_only_protein
+data:
+  grid_spacing: 1.0
+  max_dist: 12
+  voxel: false
+training:
+  learning_rate: 1.0e-05
+  weight_decay: 0.0001
+  batch_size: 20
+  num_epochs: 200
+  patience: 20
+  only_test: true
+network:
+  conv_channels:
+  - 19
+  - 64
+  - 128
+  - 256
+  conv_kernel_size: 5
+  pool_kernel_size: 2
+  dense_sizes:
+  - 16384
+  - 1000
+  - 500
+  - 200
+  drop_p: 0.2
+  pretrained_path: /gpfsscratch/rech/luh/uqu41fu/models/proli/proli_17274-complexes_5947-complexes-with-MD_59461-simulations_2926591-frames_all_with_structure_only_protein_1
+experiment_name: proli_data_augmentation_only_protein
+
+training dataset with 2341207 samples
+	Partial charge normalization: m= -0.19528023898601532                     std= 0.45360884070396423
+
+Model successfully loaded
+test dataset with 41099 samples
+	Partial charge normalization: m= -0.19528023898601532                     std= 0.45360884070396423
+
+<codes.pt_data.ProteinLigand_3DDataset object at 0x14f1ed657820>
+--------------------- Running test
+	[Test] MSELoss 2.7833
+--------------------- Running predict
+Computed preds on 41099/41099 samples! (expected: 41099)
+
+    Analysis:
+        rmse= 1.6683243880574836
+        mae= 1.2427077103091573
+        corr= (0.7304781329194128, 0.0)
+    
+[TEST] rmse: 1.6683 mae: 1.2427 corr: (0.7304781329194128, 0.0)
+826550272
+--
+GPU usage: 788.3MiB
+--
+Sun Aug 27 00:04:52 CEST 2023
