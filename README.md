@@ -23,9 +23,13 @@ conda install -c conda-forge unzip
 
 ## Data
 training/validation and test datasets can be downloaded from zenodo [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10390550.svg)](https://doi.org/10.5281/zenodo.10390550).
-With the `MD_DL_BA_env` environment activated:
-* Download training/validation data by executing datasets/download_train_data.sh
-* Download test data by executing datasets/download_test_data.sh
+To download the training/validation and test data, excute the following code:
+``` 
+conda activate MD_DL_BA_env
+cd ./datasets
+bash download_train_data.sh
+bash download_test_data.sh
+```
 
 ## Training/testing
 The workflow is described in the readme files for each neural network
