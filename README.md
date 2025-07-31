@@ -1,6 +1,6 @@
 # MD_DL_BA
 
-Code for the paper: "Spatio-temporal learning from MD simulations for protein-ligand binding affinity prediction" by Pierre-Yves Libouban, Camille Parisel, Maxime Song, Samia Aci-Sèche, Jose C. Gómez-Tamayo, Gary Tresadern, and Pascal Bonnet
+Code for the paper: "Spatio-temporal learning from molecular dynamics simulations for protein-ligand binding affinity prediction" by Pierre-Yves Libouban, Camille Parisel, Maxime Song, Samia Aci-Sèche, Jose C. Gómez-Tamayo, Gary Tresadern, and Pascal Bonnet
 
 Implementation of 4 deep neural networks - Proli, Densenucy, Timenucy and Videonucy - to predict the binding affinity of protein-ligand complexes from molecular dynamic simulations.
 
@@ -22,7 +22,7 @@ conda install -c conda-forge unzip
 ```
 
 ## Data
-training/validation and test datasets can be downloaded from zenodo [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10390550.svg)](https://doi.org/10.5281/zenodo.10390550).
+Training/validation and test datasets can be downloaded from zenodo [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10390550.svg)](https://doi.org/10.5281/zenodo.10390550).
 To download the training/validation and test data, excute the following code:
 ``` 
 conda activate MD_DL_BA_env
@@ -30,6 +30,8 @@ cd ./datasets
 bash download_train_data.sh
 bash download_test_data.sh
 ```
+
+Raw Data (Molecular dynamics simulation) without any postprocessing can be found on the [MDDB](https://mdposit.mddbr.eu/#/browse?search=MDBind)
 
 ## Training/testing
 The workflow is described in the readme files for each neural network
