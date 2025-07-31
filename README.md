@@ -31,7 +31,7 @@ bash download_train_data.sh
 bash download_test_data.sh
 ```
 
-Raw Data (Molecular dynamics simulation) without any postprocessing can be found on the [MDDB](https://mdposit.mddbr.eu/#/browse?search=MDBind)
+Raw Data (Molecular dynamics simulation) without any postprocessing can be visualized and downloaded (4.5 To) on the [MDDB](https://mdposit.mddbr.eu/#/browse?search=MDBind)
 
 ## Training/testing
 The workflow is described in the readme files for each neural network
