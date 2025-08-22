@@ -1,6 +1,6 @@
 # MD_DL_BA
 
-Code for the paper: "Spatio-temporal learning from molecular dynamics simulations for protein-ligand binding affinity prediction" by Pierre-Yves Libouban, Camille Parisel, Maxime Song, Samia Aci-Sèche, Jose C. Gómez-Tamayo, Gary Tresadern, and Pascal Bonnet
+Code for the paper published on [Bioinformatics](https://academic.oup.com/bioinformatics/article/41/8/btaf429/8238154): "Spatio-temporal learning from molecular dynamics simulations for protein-ligand binding affinity prediction" by Pierre-Yves Libouban, Camille Parisel, Maxime Song, Samia Aci-Sèche, Jose C. Gómez-Tamayo, Gary Tresadern, and Pascal Bonnet
 
 Implementation of 4 deep neural networks - Proli, Densenucy, Timenucy and Videonucy - to predict the binding affinity of protein-ligand complexes from molecular dynamic simulations.
 
