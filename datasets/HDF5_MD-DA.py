@@ -36,7 +36,7 @@ parser.add_argument('--output', '-o', required=True,
 parser.add_argument('--split_data', '-s', required=True,
                     help='provide a .csv to determine how the data should be split. Generate it via https://gitlab.com/cheminfIBB/pafnucy/-/blob/master/pdbbind_data.ipynb?ref_type=heads. We also added a column to know if we did MD simulation on the PDB.')
 parser.add_argument('--pocket_type', '-pt', default='pocket',
-                    help='name of the pocket files. Can be used to train on whole protein, but computation time is way more important (for the PDBbind: 20 min on pockets with a size of 12AA from ligand, 5h on protein)')
+                    help='name of the pocket files. Can be used to train on whole protein, but computation time is way more important (for the PDBbind: 20 min on pockets with a size of 12A from ligand, 5h on protein)')
 parser.add_argument('--method', '-m', default='all',
                     help='use min_max or every_10, if you want to include in the dataset only specific frames like the first and last, or 1 frame every 10 etc')
 parser.add_argument('--number_replicates', '-n', default="['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']",
